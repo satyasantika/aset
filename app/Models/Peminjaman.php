@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\MembersihkanCacheStatistik;
 use App\Concerns\TercatatAktivitas;
 use App\Enums\JenisPeminjam;
 use App\Enums\StatusPeminjaman;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\DB;
 class Peminjaman extends Model
 {
     /** @use HasFactory<PeminjamanFactory> */
-    use HasFactory, HasUuids, TercatatAktivitas;
+    use HasFactory, HasUuids, MembersihkanCacheStatistik, TercatatAktivitas;
 
     protected $table = 'peminjaman';
 

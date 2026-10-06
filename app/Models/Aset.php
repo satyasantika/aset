@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Actions\Dbr\TandaiDbrPerluDiperbarui;
+use App\Concerns\MembersihkanCacheStatistik;
 use App\Concerns\MemilikiTautanBerkas;
 use App\Concerns\TercatatAktivitas;
 use App\Enums\KondisiAset;
@@ -32,7 +33,7 @@ use Illuminate\Validation\ValidationException;
 class Aset extends Model
 {
     /** @use HasFactory<AsetFactory> */
-    use HasFactory, HasUuids, MemilikiTautanBerkas, SoftDeletes, TercatatAktivitas;
+    use HasFactory, HasUuids, MembersihkanCacheStatistik, MemilikiTautanBerkas, SoftDeletes, TercatatAktivitas;
 
     protected $table = 'aset';
 
