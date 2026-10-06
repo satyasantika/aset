@@ -15,6 +15,7 @@ use App\Filament\Resources\Aset\Pages\UbahAset;
 use App\Filament\Resources\Aset\RelationManagers\RiwayatKondisiRelationManager;
 use App\Filament\Resources\Aset\RelationManagers\RiwayatLokasiRelationManager;
 use App\Filament\Resources\Aset\RelationManagers\RiwayatStatusRelationManager;
+use App\Filament\Resources\Mutasi\MutasiResource;
 use App\Models\Aset;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
@@ -165,9 +166,10 @@ class AsetResource extends Resource
                 EditAction::make(),
                 self::aksiUbahKondisi(),
                 self::aksiUbahStatus(),
+                MutasiResource::aksiAjukanUntukAset(),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([self::aksiUbahKondisiMassal(), self::aksiCetakLabelMassal()]),
+                BulkActionGroup::make([self::aksiUbahKondisiMassal(), self::aksiCetakLabelMassal(), MutasiResource::aksiAjukanMassal()]),
             ]);
     }
 
