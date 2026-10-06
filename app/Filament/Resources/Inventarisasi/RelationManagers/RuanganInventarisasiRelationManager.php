@@ -31,6 +31,9 @@ class RuanganInventarisasiRelationManager extends RelationManager
                 TextColumn::make('selesai_pada')->label('Selesai')->dateTime('d M Y H:i')->placeholder('—'),
             ])
             ->recordActions([
+                Action::make('pindai')->label('Buka pemindaian')->icon('heroicon-o-qr-code')
+                    ->visible(fn (InventarisasiRuangan $record): bool => auth()->user()?->can('pindai', $record) ?? false)
+                    ->url(fn (InventarisasiRuangan $record): string => route('inventarisasi.ruangan', ['periode' => $record->periode_id, 'ruangan' => $record->ruangan_id])),
                 Action::make('tugaskan')->label('Tugaskan petugas')->icon('heroicon-o-user-plus')
                     ->visible(fn (InventarisasiRuangan $record): bool => (auth()->user()?->can('tugaskan', $record) ?? false) && $record->status !== StatusInventarisasiRuangan::Selesai)
                     ->fillForm(fn (InventarisasiRuangan $record): array => ['petugas' => $record->petugas->pluck('id')->all()])
