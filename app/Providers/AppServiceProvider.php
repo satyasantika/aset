@@ -5,8 +5,10 @@ namespace App\Providers;
 use App\Models\Gedung;
 use App\Models\KategoriRuangan;
 use App\Models\Prodi;
+use App\Models\Ruangan;
 use App\Models\TokenAkses;
 use App\Policies\MasterPolicy;
+use App\Policies\RuanganPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -34,6 +36,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Gedung::class, KategoriRuangan::class, Prodi::class] as $modelMaster) {
             Gate::policy($modelMaster, MasterPolicy::class);
         }
+
+        Gate::policy(Ruangan::class, RuanganPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);

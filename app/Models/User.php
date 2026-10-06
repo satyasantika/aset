@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -91,5 +92,13 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         $notifikasi->url = Filament::getPanel('admin')->getResetPasswordUrl($token, $this);
 
         $this->notify($notifikasi);
+    }
+
+    /** @return BelongsToMany<Ruangan, $this> */
+    public function ruanganDikelola(): BelongsToMany
+    {
+        return $this->belongsToMany(Ruangan::class, 'ruangan_pic', 'user_id', 'ruangan_id')
+            ->withPivot('utama')
+            ->withTimestamps();
     }
 }
