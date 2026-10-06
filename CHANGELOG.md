@@ -6,6 +6,17 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.4.0] - 2026-10-09
+
+Fase 4: aset, kondisi, label QR, lookup publik.
+
+### Ditambahkan
+- Register aset per kode barang + NUP (UUIDv7) dengan invarian BR-01/02/04, riwayat kondisi/lokasi/status, `label_lama`, dan `sedangDipinjam` yang dihitung.
+- `AsetResource` dengan pendaftaran tunggal dan massal (n unit → n baris, satu transaksi), filter/pencarian, toggle fitur ditegakkan di Action.
+- Ubah kondisi dan status (transisi sah PRD §7, SK wajib untuk dihapus), aksi massal, dan relation manager riwayat.
+- Cetak label QR A4 (PDF di-stream) dengan QR server-side (`endroid/qr-code`) berisi `/a/{id}`; `TandaiLabelDicetak`.
+- Lookup publik `/a/{id}` (field putih BR-18, noindex, 30 permintaan/menit/IP), resolusi label lama `/l/{kode}` via `label_lama`, dan halaman `/pindai` (kamera `html5-qrcode`).
+
 ## [0.3.0] - 2026-10-08
 
 Fase 3: master data.
