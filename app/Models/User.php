@@ -7,6 +7,8 @@ use App\Concerns\TercatatAktivitas;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
+use Filament\Auth\Notifications\ResetPassword;
+use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -80,5 +82,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     {
         $this->app_authentication_recovery_codes = $codes;
         $this->save();
+    }
+
+    /** Tautan atur kata sandi diarahkan ke halaman reset panel /admin. */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $notifikasi = new ResetPassword($token);
+        $notifikasi->url = Filament::getPanel('admin')->getResetPasswordUrl($token, $this);
+
+        $this->notify($notifikasi);
     }
 }

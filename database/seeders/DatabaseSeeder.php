@@ -10,16 +10,16 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(PeranDanIzinSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Akun super-admin contoh hanya untuk lingkungan lokal; produksi dibuat manual (tanpa kata sandi bawaan).
+        if (app()->environment('local')) {
+            User::query()->firstOrCreate(
+                ['email' => 'admin@unsil.ac.id'],
+                ['name' => 'Admin Lokal', 'password' => 'password', 'aktif' => true],
+            )->assignRole('super-admin');
+        }
     }
 }
