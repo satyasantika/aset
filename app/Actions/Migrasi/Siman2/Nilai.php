@@ -80,7 +80,7 @@ final class Nilai
     /**
      * Peta dari sel JSON objek `{ "2": "Rusak Ringan" }`.
      *
-     * @return array<string, string>
+     * @return array<int|string, string>
      */
     public static function peta(mixed $nilai): array
     {

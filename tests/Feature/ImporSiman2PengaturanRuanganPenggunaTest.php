@@ -25,11 +25,7 @@ beforeEach(function () {
     Notification::fake();
 });
 
-afterEach(function () {
-    foreach (glob(storage_path('app/tmp/siman2-uji-*.xlsx')) ?: [] as $f) {
-        @unlink($f);
-    }
-});
+afterEach(fn () => Siman2Fixture::bersihkan());
 
 function petaStandar(): string
 {
