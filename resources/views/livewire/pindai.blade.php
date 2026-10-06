@@ -67,6 +67,29 @@
                 <p class="mt-3 rounded bg-green-50 p-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-200" role="status">Kondisi diperbarui menjadi {{ $aset->kondisi->label() }}.</p>
             @endif
 
+            @if ($nomorMutasi)
+                <p class="mt-3 rounded bg-green-50 p-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-200" role="status">Mutasi {{ $nomorMutasi }} diajukan dan menunggu persetujuan admin BMN.</p>
+            @endif
+
+            @if ($aset->ruangan && auth()->user()->can('ajukan', [\App\Models\Mutasi::class, $aset->ruangan]) && $aset->status === \App\Enums\StatusAset::Aktif)
+                <details class="mt-4 rounded-lg border border-gray-300 p-3 dark:border-gray-700">
+                    <summary class="cursor-pointer text-sm font-medium">Ajukan mutasi lokasi</summary>
+                    <form wire:submit="ajukanMutasi" class="mt-3 space-y-2">
+                        <select wire:model="tujuanMutasi" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900">
+                            <option value="">Pilih ruangan tujuan…</option>
+                            @foreach ($this->ruanganTujuan as $id => $nama)
+                                <option value="{{ $id }}">{{ $nama }}</option>
+                            @endforeach
+                        </select>
+                        @error('tujuanMutasi') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+                        <textarea wire:model="alasanMutasi" rows="2" placeholder="Alasan mutasi" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900"></textarea>
+                        @error('alasanMutasi') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+                        @error('aset') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+                        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">Ajukan</button>
+                    </form>
+                </details>
+            @endif
+
             <div class="mt-4 flex flex-wrap gap-2">
                 @can('ubahKondisi', $aset)
                     @foreach (\App\Enums\KondisiAset::cases() as $k)

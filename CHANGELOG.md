@@ -6,6 +6,15 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.5.0] - 2026-10-10
+
+Fase 5: mutasi lokasi.
+
+### Ditambahkan
+- Pengajuan mutasi oleh PIC ruangan asal (BR-05), persetujuan/penolakan admin-bmn, dan pembatalan oleh pengaju; nomor `MUT-{tahun}-{4 digit}` bebas tabrakan lewat `Cache::lock`.
+- Persetujuan satu transaksi dengan lock per aset: ruangan berpindah, riwayat lokasi tercatat, identitas aset tidak dinomori ulang (R-17), penanda DBR (stub F9). Aset dipinjam/tidak aktif tidak dapat dimutasi.
+- `MutasiResource` (lihat, putuskan), serta aksi mutasi dari halaman aset (satuan/massal) dan `/pindai`.
+
 ## [0.4.0] - 2026-10-09
 
 Fase 4: aset, kondisi, label QR, lookup publik.
