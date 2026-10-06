@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\Aset\UbahKondisiAset;
 use App\Actions\Label\ResolusiLabel;
 use App\Actions\Mutasi\AjukanMutasi;
+use App\Actions\Pemeliharaan\TerimaLaporanKerusakan;
 use App\Enums\KondisiAset;
 use App\Models\Aset;
 use App\Models\KodefikasiBarang;
@@ -12,6 +13,7 @@ use App\Models\Ruangan;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -42,6 +44,10 @@ class Pindai extends Component
 
     public ?string $nomorMutasi = null;
 
+    public string $deskripsiKerusakan = '';
+
+    public ?string $nomorTiket = null;
+
     public function cari(ResolusiLabel $resolusi): void
     {
         $this->validate(['teks' => ['required', 'string', 'max:500']]);
@@ -52,6 +58,7 @@ class Pindai extends Component
         $this->pesan = $aset === null ? 'Data untuk kode "'.e(mb_strimwidth($this->teks, 0, 80, '…')).'" tidak ditemukan.' : null;
         $this->kondisiBaru = null;
         $this->nomorMutasi = null;
+        $this->nomorTiket = null;
     }
 
     public function ubahKondisi(string $kondisi): void
@@ -96,9 +103,34 @@ class Pindai extends Component
         return Ruangan::query()->where('id', '!=', $this->aset->ruangan_id ?? '')->orderBy('nama')->pluck('nama', 'id');
     }
 
+    /** Pengguna login (civitas/staf) melaporkan kerusakan langsung dari hasil pindai. */
+    public function laporKerusakan(): void
+    {
+        $aset = $this->aset;
+        abort_if($aset === null, 404);
+
+        /** @var User $pelapor */
+        $pelapor = auth()->user();
+        $kunci = 'lapor-pindai:'.$pelapor->getKey();
+
+        if (RateLimiter::tooManyAttempts($kunci, 10)) {
+            $this->addError('deskripsiKerusakan', 'Terlalu banyak laporan. Coba lagi nanti.');
+
+            return;
+        }
+
+        $this->validate(['deskripsiKerusakan' => ['required', 'string', 'min:5', 'max:'.TerimaLaporanKerusakan::MAKS_DESKRIPSI]]);
+        RateLimiter::hit($kunci, 3600);
+
+        $tiket = app(TerimaLaporanKerusakan::class)->handle($aset, $this->deskripsiKerusakan, null, null, null, $pelapor);
+
+        $this->nomorTiket = $tiket->nomor;
+        $this->reset('deskripsiKerusakan');
+    }
+
     public function ulang(): void
     {
-        $this->reset('teks', 'asetId', 'pesan', 'kondisiBaru', 'tujuanMutasi', 'alasanMutasi', 'nomorMutasi');
+        $this->reset('teks', 'asetId', 'pesan', 'kondisiBaru', 'tujuanMutasi', 'alasanMutasi', 'nomorMutasi', 'deskripsiKerusakan', 'nomorTiket');
     }
 
     #[Computed]

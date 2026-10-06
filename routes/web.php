@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LabelPdfController;
+use App\Http\Controllers\Publik\LaporKerusakanController;
 use App\Http\Controllers\Publik\LookupAsetController;
 use App\Livewire\AjukanPinjam;
 use App\Livewire\Keranjang;
@@ -20,6 +21,10 @@ Route::middleware('throttle:lookup')->group(function () {
     Route::get('/a/{aset}', [LookupAsetController::class, 'tampil'])->whereUuid('aset')->name('publik.aset');
     Route::get('/l/{kode}', [LookupAsetController::class, 'labelLama'])->where('kode', '[A-Za-z0-9._\-]{1,100}')->name('publik.label-lama');
 });
+
+// Lapor kerusakan (BR-12): tampilan formulir dibatasi seperti lookup; pengiriman 5/jam/IP.
+Route::get('/lapor-kerusakan/{aset}', [LaporKerusakanController::class, 'form'])->whereUuid('aset')->middleware('throttle:lookup')->name('publik.lapor');
+Route::post('/lapor-kerusakan/{aset}', [LaporKerusakanController::class, 'kirim'])->whereUuid('aset')->middleware('throttle:lapor')->name('publik.lapor.kirim');
 
 Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::get('/pindai', Pindai::class)->name('pindai');

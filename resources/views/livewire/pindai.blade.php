@@ -90,6 +90,19 @@
                 </details>
             @endif
 
+            @if ($nomorTiket)
+                <p class="mt-3 rounded bg-green-50 p-2 text-sm text-green-800 dark:bg-green-950 dark:text-green-200" role="status">Laporan diterima sebagai tiket {{ $nomorTiket }}.</p>
+            @endif
+
+            <details class="mt-4 rounded-lg border border-gray-300 p-3 dark:border-gray-700">
+                <summary class="cursor-pointer text-sm font-medium">Laporkan kerusakan</summary>
+                <form wire:submit="laporKerusakan" class="mt-3 space-y-2">
+                    <textarea wire:model="deskripsiKerusakan" rows="3" placeholder="Apa yang rusak?" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900"></textarea>
+                    @error('deskripsiKerusakan') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
+                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">Kirim laporan</button>
+                </form>
+            </details>
+
             <div class="mt-4 flex flex-wrap gap-2">
                 @can('ubahKondisi', $aset)
                     @foreach (\App\Enums\KondisiAset::cases() as $k)
@@ -105,7 +118,7 @@
                 @if ($staf && auth()->user()->can('peminjaman.catat'))
                     <a href="{{ route('keranjang') }}" class="rounded-lg border border-gray-400 px-3 py-1.5 text-sm font-medium">Buka keranjang peminjaman</a>
                 @endif
-                <a href="{{ url('/lapor-kerusakan/'.$aset->id) }}" class="rounded-lg border border-gray-400 px-3 py-1.5 text-sm font-medium">Laporkan kerusakan</a>
+
                 <button type="button" wire:click="ulang" class="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300">Pindai lagi</button>
             </div>
         </div>
