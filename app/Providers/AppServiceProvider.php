@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Contracts\PenyimpananBerkas;
+use App\Models\Aset;
 use App\Models\Gedung;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
 use App\Models\Prodi;
 use App\Models\Ruangan;
 use App\Models\TokenAkses;
+use App\Policies\AsetPolicy;
 use App\Policies\MasterPolicy;
 use App\Policies\RuanganPolicy;
 use App\Services\TautanEksternal;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::policy(Ruangan::class, RuanganPolicy::class);
+        Gate::policy(Aset::class, AsetPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);

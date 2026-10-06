@@ -101,4 +101,15 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->withPivot('utama')
             ->withTimestamps();
     }
+
+    /** BR-05: boleh bertindak atas ruangan ini? Admin: semua; PIC: hanya ruangan yang ditugaskan. */
+    public function bolehMengelolaRuangan(?string $ruanganId): bool
+    {
+        if ($this->hasAnyRole(Ruangan::PERAN_SEMUA_RUANGAN)) {
+            return true;
+        }
+
+        return $ruanganId !== null
+            && $this->ruanganDikelola()->whereKey($ruanganId)->exists();
+    }
 }
