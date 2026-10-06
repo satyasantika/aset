@@ -196,12 +196,6 @@ return [
     |
     */
 
-    /*
-    | Surel yang boleh membuka dasbor Horizon di luar lokal (sementara; diganti peran super-admin di F2).
-    */
-
-    'emails' => array_filter(array_map('trim', explode(',', (string) env('HORIZON_EMAILS', '')))),
-
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
