@@ -98,6 +98,12 @@ class Aset extends Model
         });
     }
 
+    /** URL publik yang dikodekan di QR label (BR-17): `/a/{id}`. */
+    public function urlPublik(): string
+    {
+        return url('/a/'.$this->getKey());
+    }
+
     /** @return BelongsTo<Ruangan, $this> */
     public function ruangan(): BelongsTo
     {
@@ -183,6 +189,24 @@ class Aset extends Model
             ->where($this->qualifyColumn('status'), StatusAset::Aktif->value)
             ->where($this->qualifyColumn('kondisi'), '!=', KondisiAset::RusakBerat->value)
             ->where($this->qualifyColumn('dapat_dipinjam'), true);
+    }
+
+    /**
+     * Aset yang boleh ditindak pengguna (BR-05): admin semua; PIC hanya yang berada di ruangan yang ditugaskan.
+     *
+     * @param  Builder<Aset>  $query
+     * @return Builder<Aset>
+     */
+    public function scopeDikelolaOleh(Builder $query, User $pengguna): Builder
+    {
+        if ($pengguna->hasAnyRole(Ruangan::PERAN_SEMUA_RUANGAN)) {
+            return $query;
+        }
+
+        return $query->whereIn(
+            $this->qualifyColumn('ruangan_id'),
+            DB::table('ruangan_pic')->where('user_id', $pengguna->getKey())->select('ruangan_id'),
+        );
     }
 
     /** Apakah aset ini (menurut aturan, tanpa melihat peminjaman bentrok) boleh dipinjam. */

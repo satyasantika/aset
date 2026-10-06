@@ -18,6 +18,7 @@ use App\Filament\Resources\Aset\RelationManagers\RiwayatStatusRelationManager;
 use App\Models\Aset;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
+use App\Models\Ruangan;
 use App\Rules\KodeBarangValid;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -166,7 +167,7 @@ class AsetResource extends Resource
                 self::aksiUbahStatus(),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([self::aksiUbahKondisiMassal()]),
+                BulkActionGroup::make([self::aksiUbahKondisiMassal(), self::aksiCetakLabelMassal()]),
             ]);
     }
 
@@ -183,6 +184,38 @@ class AsetResource extends Resource
             ->action(function (Aset $record, array $data): void {
                 app(UbahKondisiAset::class)->handle($record, KondisiAset::from($data['kondisi']), auth()->user(), 'manual', null, $data['catatan'] ?? null);
                 Notification::make()->success()->title('Kondisi diperbarui')->send();
+            });
+    }
+
+    public static function aksiCetakLabel(): Action
+    {
+        return Action::make('cetakLabel')
+            ->label('Cetak label')->icon('heroicon-o-qr-code')
+            ->visible(fn (): bool => auth()->user()?->can('label.cetak') ?? false)
+            ->schema([
+                Select::make('mode')->label('Yang dicetak')->required()->default('belum_dicetak')->options([
+                    'belum_dicetak' => 'Semua yang belum pernah dicetak',
+                    'perlu_cetak_ulang' => 'Semua yang perlu cetak ulang',
+                    'ruangan' => 'Semua aset di satu ruangan',
+                ])->live(),
+                Select::make('ruangan_id')->label('Ruangan')->searchable()
+                    ->options(fn () => Ruangan::query()->orderBy('nama')->pluck('nama', 'id')->all())
+                    ->visible(fn (Get $get) => $get('mode') === 'ruangan')->required(fn (Get $get) => $get('mode') === 'ruangan'),
+            ])
+            ->action(fn (array $data) => redirect()->route('cetak.label', array_filter($data)));
+    }
+
+    public static function aksiCetakLabelMassal(): BulkAction
+    {
+        return BulkAction::make('cetakLabelMassal')
+            ->label('Cetak label')->icon('heroicon-o-qr-code')
+            ->visible(fn (): bool => auth()->user()?->can('label.cetak') ?? false)
+            ->authorizeIndividualRecords('cetakLabel')
+            ->deselectRecordsAfterCompletion()
+            ->action(function (Collection $records) {
+                session()->put('cetak_label_ids', $records->pluck('id')->all());
+
+                return redirect()->route('cetak.label', ['mode' => 'terpilih']);
             });
     }
 

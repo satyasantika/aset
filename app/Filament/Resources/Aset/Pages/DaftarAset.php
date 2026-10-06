@@ -46,6 +46,7 @@ class DaftarAset extends ListRecords
 
                     Notification::make()->success()->title("{$hasil->count()} aset didaftarkan")->send();
                 }),
+            AsetResource::aksiCetakLabel(),
             CreateAction::make(),
         ];
     }
