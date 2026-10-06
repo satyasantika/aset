@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Gedung;
 use App\Models\KategoriRuangan;
+use App\Models\KodefikasiBarang;
 use App\Models\Prodi;
 use App\Models\Ruangan;
 use App\Models\TokenAkses;
@@ -33,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(fn ($user) => $user->hasRole('super-admin') ? true : null);
-        foreach ([Gedung::class, KategoriRuangan::class, Prodi::class] as $modelMaster) {
+        foreach ([Gedung::class, KategoriRuangan::class, Prodi::class, KodefikasiBarang::class] as $modelMaster) {
             Gate::policy($modelMaster, MasterPolicy::class);
         }
 

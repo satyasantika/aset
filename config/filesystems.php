@@ -38,6 +38,14 @@ return [
             'report' => false,
         ],
 
+        // Berkas sementara (impor Excel/CSV) — dibersihkan Livewire > 24 jam; tidak untuk penyimpanan (STANDAR-TEKNIS §1a).
+        'tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/tmp'),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
