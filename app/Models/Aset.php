@@ -107,19 +107,19 @@ class Aset extends Model
     /** @return HasMany<RiwayatKondisiAset, $this> */
     public function riwayatKondisi(): HasMany
     {
-        return $this->hasMany(RiwayatKondisiAset::class)->latest('created_at');
+        return $this->hasMany(RiwayatKondisiAset::class)->latest('created_at')->latest('id');
     }
 
     /** @return HasMany<RiwayatLokasiAset, $this> */
     public function riwayatLokasi(): HasMany
     {
-        return $this->hasMany(RiwayatLokasiAset::class)->latest('created_at');
+        return $this->hasMany(RiwayatLokasiAset::class)->latest('created_at')->latest('id');
     }
 
     /** @return HasMany<RiwayatStatusAset, $this> */
     public function riwayatStatus(): HasMany
     {
-        return $this->hasMany(RiwayatStatusAset::class)->latest('created_at');
+        return $this->hasMany(RiwayatStatusAset::class)->latest('created_at')->latest('id');
     }
 
     /** @return HasMany<LabelLama, $this> */
