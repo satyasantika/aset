@@ -5,7 +5,10 @@
 /public/hot
 /public/storage
 /public/css
+/public/css/filament
+/public/fonts/filament
 /public/js
+/public/js/filament
 /storage/*.key
 /storage/pail
 /storage/app/tmp/*
