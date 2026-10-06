@@ -102,6 +102,9 @@
                 @if ($staf)
                     <a href="{{ url('/admin/aset/'.$aset->id) }}" class="rounded-lg border border-gray-400 px-3 py-1.5 text-sm font-medium">Buka di panel</a>
                 @endif
+                @if ($staf && auth()->user()->can('peminjaman.catat'))
+                    <a href="{{ route('keranjang') }}" class="rounded-lg border border-gray-400 px-3 py-1.5 text-sm font-medium">Buka keranjang peminjaman</a>
+                @endif
                 <a href="{{ url('/lapor-kerusakan/'.$aset->id) }}" class="rounded-lg border border-gray-400 px-3 py-1.5 text-sm font-medium">Laporkan kerusakan</a>
                 <button type="button" wire:click="ulang" class="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-700 dark:text-blue-300">Pindai lagi</button>
             </div>

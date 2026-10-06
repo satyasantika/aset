@@ -8,9 +8,8 @@ use App\Enums\StatusMutasi;
 use App\Models\Aset;
 use App\Models\Mutasi;
 use App\Models\User;
+use App\Support\LockAset;
 use App\Support\Pengaturan;
-use Illuminate\Contracts\Cache\Lock;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -29,22 +28,7 @@ class SetujuiMutasi
 
         $idAset = $mutasi->aset()->pluck('aset.id')->sort()->values()->all();
 
-        /** @var list<Lock> $kunci */
-        $kunci = [];
-
-        try {
-            foreach ($idAset as $id) {
-                $lock = Cache::lock("aset:mutasi:{$id}", 10);
-                $lock->block(5);
-                $kunci[] = $lock;
-            }
-
-            return DB::transaction(fn (): Mutasi => $this->setujui($mutasi, $pelaku, $catatan, $idAset));
-        } finally {
-            foreach (array_reverse($kunci) as $lock) {
-                $lock->release();
-            }
-        }
+        return LockAset::dengan('mutasi', $idAset, fn (): Mutasi => DB::transaction(fn (): Mutasi => $this->setujui($mutasi, $pelaku, $catatan, $idAset)));
     }
 
     /** @param  list<string>  $idAset */
