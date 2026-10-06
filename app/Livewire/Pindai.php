@@ -55,7 +55,7 @@ class Pindai extends Component
         $aset = $resolusi->handle($this->teks);
 
         $this->asetId = $aset?->getKey();
-        $this->pesan = $aset === null ? 'Data untuk kode "'.e(mb_strimwidth($this->teks, 0, 80, '…')).'" tidak ditemukan.' : null;
+        $this->pesan = $aset === null ? 'Data untuk kode "'.mb_strimwidth($this->teks, 0, 80, '…').'" tidak ditemukan.' : null;
         $this->kondisiBaru = null;
         $this->nomorMutasi = null;
         $this->nomorTiket = null;
