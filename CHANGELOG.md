@@ -6,6 +6,19 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.7.0] - 2026-10-12
+
+Fase 7: migrasi data SIMAN-FKIP-2.
+
+### Ditambahkan
+- Perintah `siman2:impor` (XLSX; `--dry-run`, `--nup-berurutan`, pemetaan username→surel) yang idempoten lewat `impor_siman2_log`: pengaturan, kategori ruangan, ruangan + foto Drive, pengguna (tanpa kata sandi lama; surel atur kata sandi) + PIC.
+- Impor inventaris: baris jumlah n → n aset, kondisi per unit, `dicetak_pada`, foto, `label_lama` (KODEKATEGORI-KODE-i, KODE-i, KODE/NUP/KODEBMN), serta deteksi label terdampak mutasi unit (R-17) yang ditandai cetak ulang tanpa `label_lama` ambigu.
+- Impor mutasi, peminjaman (per `kodeTransaksi`, `kodeUnit` → `label_lama`), dan log lama (`activity_log` `siman2`, `pelaku_lama` sebagai properti).
+- `siman2:verifikasi` (rekonsiliasi §6) dan halaman "Label perlu cetak ulang" per ruangan.
+
+### Catatan
+- Uji dengan ekspor nyata (F7.4) adalah langkah manusia dan belum dijalankan; lihat `docs/migrasi/HASIL-UJI-MIGRASI.md`.
+
 ## [0.6.0] - 2026-10-11
 
 Fase 6: peminjaman internal.
