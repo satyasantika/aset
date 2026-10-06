@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\LabelPdfController;
 use App\Http\Controllers\Publik\LookupAsetController;
+use App\Livewire\AjukanPinjam;
+use App\Livewire\Keranjang;
 use App\Livewire\Pindai;
+use App\Livewire\PinjamanSaya;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +23,9 @@ Route::middleware('throttle:lookup')->group(function () {
 
 Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::get('/pindai', Pindai::class)->name('pindai');
+    Route::get('/keranjang', Keranjang::class)->name('keranjang');
+    Route::get('/pinjam', AjukanPinjam::class)->name('pinjam');
+    Route::get('/pinjaman-saya', PinjamanSaya::class)->name('pinjaman-saya');
 
     Route::match(['get', 'post'], '/cetak/label', LabelPdfController::class)->name('cetak.label');
 });

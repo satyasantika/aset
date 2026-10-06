@@ -6,6 +6,16 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.6.0] - 2026-10-11
+
+Fase 6: peminjaman internal.
+
+### Ditambahkan
+- Skema peminjaman (nomor `PJM-{tahun}-{5 digit}`) dan `CekKetersediaan` (BR-08/BR-11: rentang tumpang tindih ditolak, batas bersinggungan boleh, peminjaman terlambat tetap menahan aset).
+- Keranjang PIC `/keranjang` dengan `CatatPeminjamanLangsung` (transaksi + `lockForUpdate` + lock Redis per aset, semua-atau-tidak-sama-sekali, batas `maks_hari_pinjam`).
+- Pengajuan online civitas `/pinjam` (katalog tanpa data pribadi), `/pinjaman-saya`, serta Action setujui/tolak/batalkan/serahkan dengan cek ketersediaan ulang di dalam lock; permohonan pihak luar dicatat admin dan diputuskan pejabat-penatausahaan (BR-07).
+- Pengembalian sekaligus dengan kondisi wajib per item (sebagian ditolak), pembaruan kondisi aset sumber `peminjaman`, stub tiket pemeliharaan (F8), `PeminjamanResource` dengan tab Aktif/Terlambat/Diajukan/Riwayat dan pembatasan data pribadi (BR-23).
+
 ## [0.5.0] - 2026-10-10
 
 Fase 5: mutasi lokasi.

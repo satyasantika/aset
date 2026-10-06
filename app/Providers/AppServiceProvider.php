@@ -8,12 +8,14 @@ use App\Models\Gedung;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
 use App\Models\Mutasi;
+use App\Models\Peminjaman;
 use App\Models\Prodi;
 use App\Models\Ruangan;
 use App\Models\TokenAkses;
 use App\Policies\AsetPolicy;
 use App\Policies\MasterPolicy;
 use App\Policies\MutasiPolicy;
+use App\Policies\PeminjamanPolicy;
 use App\Policies\RuanganPolicy;
 use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
@@ -55,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Ruangan::class, RuanganPolicy::class);
         Gate::policy(Aset::class, AsetPolicy::class);
         Gate::policy(Mutasi::class, MutasiPolicy::class);
+        Gate::policy(Peminjaman::class, PeminjamanPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);
