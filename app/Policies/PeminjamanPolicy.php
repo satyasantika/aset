@@ -38,6 +38,12 @@ class PeminjamanPolicy
         return $pelaku->can('peminjaman.ajukan');
     }
 
+    /** Admin mencatat permohonan pihak luar (diteruskan ke pejabat-penatausahaan, BR-07). */
+    public function catatPihakLuar(User $pelaku): bool
+    {
+        return $pelaku->hasAnyRole(['super-admin', 'admin-bmn']);
+    }
+
     /** Menyetujui/menolak/menyerahkan/menerima kembali. */
     public function putuskan(User $pelaku, Peminjaman $peminjaman): bool
     {

@@ -6,12 +6,14 @@ use App\Concerns\TercatatAktivitas;
 use App\Enums\JenisPeminjam;
 use App\Enums\StatusPeminjaman;
 use Database\Factories\PeminjamanFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Peminjaman internal (BR-07..BR-11). Status `dipinjam` aset dihitung dari baris ini (BR-04), bukan disimpan di aset.
@@ -63,6 +65,36 @@ class Peminjaman extends Model
     public function pencatat(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dicatat_oleh');
+    }
+
+    /**
+     * Peminjaman yang boleh dilihat pengguna (BR-23): admin semua; pejabat-penatausahaan permohonan pihak luar;
+     * PIC yang memuat aset di ruangannya; selain itu hanya miliknya sendiri.
+     *
+     * @param  Builder<Peminjaman>  $query
+     * @return Builder<Peminjaman>
+     */
+    public function scopeTerlihatOleh(Builder $query, User $pengguna): Builder
+    {
+        if ($pengguna->hasAnyRole(['super-admin', 'admin-bmn'])) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($pengguna) {
+            $q->where('peminjam_user_id', $pengguna->getKey());
+
+            if ($pengguna->hasRole('pejabat-penatausahaan')) {
+                $q->orWhere('jenis_peminjam', JenisPeminjam::PihakLuar->value);
+            }
+
+            if ($pengguna->hasRole('pic-ruangan')) {
+                $q->orWhereIn('peminjaman.id', DB::table('peminjaman_item')
+                    ->join('aset', 'aset.id', '=', 'peminjaman_item.aset_id')
+                    ->join('ruangan_pic', 'ruangan_pic.ruangan_id', '=', 'aset.ruangan_id')
+                    ->where('ruangan_pic.user_id', $pengguna->getKey())
+                    ->select('peminjaman_item.peminjaman_id'));
+            }
+        });
     }
 
     /** Terlambat dihitung, bukan status (BR-09): `dipinjam` dan rencana kembali sudah lewat. */
