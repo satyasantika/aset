@@ -6,6 +6,23 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [1.0.0-rc.1] - 2026-10-18
+
+Fase 12: pengerasan, produksi, dan persiapan cutover. Rilis kandidat — `v1.0.0` ditandai setelah langkah manusia
+(cutover, `docs/07-MIGRASI-DATA.md` §7) selesai.
+
+### Ditambahkan
+- Uji keamanan: `MatriksAksesTest` (seluruh sel matriks PRD §3.1), `KeamananTest` (IDOR, rate limit, XSS, tanpa unggahan, konkurensi, header, tanpa QR pihak ketiga); `docs/KEAMANAN.md` (hasil `composer audit`/`npm audit`: bersih).
+- Header keamanan global (`HeaderKeamanan`): CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS di produksi.
+- Docker produksi tanpa MySQL (`Dockerfile`, `compose.prod.yaml`, nginx, Horizon, scheduler, cadangan SQLite harian 30 hari), `.env.production.example`, `docs/DEPLOY.md` (DNS, TLS, cadangan & uji pulih).
+- `siman:siapkan-uat` (akun & data contoh staging) serta `docs/PANDUAN-PIC.md` dan `docs/PANDUAN-ADMIN.md`.
+
+### Diperbaiki
+- Pesan pindai "tidak ditemukan" dirender tanpa escape dari properti Livewire publik; kini di-escape Blade.
+
+### Diubah
+- SQLite produksi memakai WAL, `busy_timeout` 5000 ms, `synchronous=NORMAL` (dapat diatur lewat env).
+
 ## [0.11.0] - 2026-10-17
 
 Fase 11: notifikasi, penjadwal, dan API untuk Surat.
