@@ -318,7 +318,7 @@ it('panel: PIC melihat daftar miliknya, membuka, menyetujui, dan menyerahkan', f
     $asing = pj3Ajukan([pj3Barang($r2)->id], pj3Pelaku('civitas'));
     $this->actingAs($pic);
 
-    Livewire::test(DaftarPeminjaman::class)->assertCanSeeTableRecords([$milik])->assertCanNotSeeTableRecords([$asing]);
+    Livewire::test(DaftarPeminjaman::class)->set('activeTab', 'diajukan')->assertCanSeeTableRecords([$milik])->assertCanNotSeeTableRecords([$asing]);
     $this->get('/admin/peminjaman/'.$asing->id)->assertNotFound();
 
     Livewire::test(LihatPeminjaman::class, ['record' => $milik->getRouteKey()])
@@ -347,7 +347,7 @@ it('panel: admin mencatat permohonan pihak luar; pejabat melihat dan memutuskann
     expect($p->jenis_peminjam)->toBe(JenisPeminjam::PihakLuar);
 
     $this->actingAs(pj3Pelaku('pejabat-penatausahaan'));
-    Livewire::test(DaftarPeminjaman::class)->assertCanSeeTableRecords([$p])->assertActionHidden('catatPihakLuar');
+    Livewire::test(DaftarPeminjaman::class)->set('activeTab', 'diajukan')->assertCanSeeTableRecords([$p])->assertActionHidden('catatPihakLuar');
     Livewire::test(LihatPeminjaman::class, ['record' => $p->getRouteKey()])
         ->assertActionVisible('setujui')->assertActionHidden('serahkan')
         ->callAction('tolak', ['catatan' => 'Tidak sesuai kebijakan']);

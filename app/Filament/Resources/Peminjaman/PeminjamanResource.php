@@ -13,6 +13,7 @@ use App\Models\Peminjaman;
 use App\Models\User;
 use BackedEnum;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -95,7 +96,9 @@ class PeminjamanResource extends Resource
                 TextColumn::make('jenis_peminjam')->label('Jenis')->badge()->formatStateUsing(fn (JenisPeminjam $state) => $state->label()),
                 TextColumn::make('item_count')->label('Jumlah aset'),
                 TextColumn::make('mulai')->label('Mulai')->dateTime('d M Y H:i')->sortable(),
-                TextColumn::make('rencana_kembali')->label('Rencana kembali')->dateTime('d M Y H:i')->sortable(),
+                TextColumn::make('rencana_kembali')->label('Rencana kembali')->dateTime('d M Y H:i')->sortable()
+                    ->color(fn (Peminjaman $record) => $record->terlambat() ? 'danger' : null)
+                    ->description(fn (Peminjaman $record) => $record->terlambat() ? 'Terlambat '.$record->rencana_kembali->diffForHumans(syntax: CarbonInterface::DIFF_ABSOLUTE) : null),
                 TextColumn::make('status')->label('Status')->badge()
                     ->formatStateUsing(fn (StatusPeminjaman $state) => $state->label())
                     ->color(fn (StatusPeminjaman $state) => match ($state) {
