@@ -42,7 +42,7 @@
 
     @if ($pesan)
         <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100" role="alert">
-            {!! $pesan !!}
+            {{ $pesan }}
         </div>
     @endif
 
