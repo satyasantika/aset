@@ -38,3 +38,6 @@ Homestead.yaml
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Pemetaan pengguna terisi memuat surel (data pribadi)
+/docs/migrasi/pemetaan-pengguna.terisi.csv
