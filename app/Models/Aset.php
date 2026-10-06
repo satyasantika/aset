@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -136,17 +135,12 @@ class Aset extends Model
 
     /**
      * Status `dipinjam` tidak disimpan (BR-04): dihitung dari peminjaman yang masih berjalan.
-     * Tabel peminjaman baru ada sejak fase peminjaman; sebelum itu tidak ada barang yang dipinjam.
      *
      * @return Attribute<bool, never>
      */
     protected function sedangDipinjam(): Attribute
     {
         return Attribute::get(function (): bool {
-            if (! Schema::hasTable('peminjaman_item')) {
-                return false;
-            }
-
             return DB::table('peminjaman_item')
                 ->join('peminjaman', 'peminjaman.id', '=', 'peminjaman_item.peminjaman_id')
                 ->where('peminjaman_item.aset_id', $this->getKey())

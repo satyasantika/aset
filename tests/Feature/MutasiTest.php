@@ -7,6 +7,7 @@ use App\Actions\Mutasi\SetujuiMutasi;
 use App\Actions\Mutasi\TolakMutasi;
 use App\Enums\StatusAset;
 use App\Enums\StatusMutasi;
+use App\Enums\StatusPeminjaman;
 use App\Exceptions\FiturNonaktif;
 use App\Filament\Resources\Aset\Pages\DaftarAset;
 use App\Filament\Resources\Mutasi\Pages\DaftarMutasi;
@@ -14,6 +15,7 @@ use App\Filament\Resources\Mutasi\Pages\LihatMutasi;
 use App\Livewire\Pindai;
 use App\Models\Aset;
 use App\Models\Mutasi;
+use App\Models\Peminjaman;
 use App\Models\Ruangan;
 use App\Models\User;
 use App\Support\Pengaturan;
@@ -21,11 +23,8 @@ use Database\Seeders\PeranDanIzinSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
@@ -363,21 +362,8 @@ it('/pindai: PIC mengajukan mutasi aset di ruangannya, bukan aset ruangan lain',
     Livewire::test(Pindai::class)->set('teks', $lain->id)->call('cari')->assertDontSee('Ajukan mutasi lokasi');
 });
 
-/** Membuat tabel peminjaman minimal bila F6 belum ada, lalu satu peminjaman berstatus dipinjam. */
+/** Satu peminjaman berstatus dipinjam yang memuat aset. */
 function bikinPeminjamanBerjalan(Aset $aset): void
 {
-    if (! Schema::hasTable('peminjaman')) {
-        Schema::create('peminjaman', function (Blueprint $t) {
-            $t->uuid('id')->primary();
-            $t->string('status', 20);
-        });
-        Schema::create('peminjaman_item', function (Blueprint $t) {
-            $t->uuid('peminjaman_id');
-            $t->uuid('aset_id');
-        });
-    }
-
-    $id = (string) Str::uuid7();
-    DB::table('peminjaman')->insert(['id' => $id, 'status' => 'dipinjam'] + (Schema::hasColumn('peminjaman', 'nomor') ? ['nomor' => 'T-'.$id] : []));
-    DB::table('peminjaman_item')->insert(['peminjaman_id' => $id, 'aset_id' => $aset->id]);
+    Peminjaman::factory()->status(StatusPeminjaman::Dipinjam)->untuk($aset)->create();
 }
