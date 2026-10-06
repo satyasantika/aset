@@ -1,0 +1,9 @@
+kode,uraian,tingkat,induk_kode,kategori_lokal
+3,[CONTOH] Peralatan dan Mesin,1,,
+310,[CONTOH] Alat Besar / Alat Kantor dan Rumah Tangga,2,3,
+31001,[CONTOH] Alat Kantor dan Rumah Tangga,3,310,
+3100102,[CONTOH] Alat Rumah Tangga,4,31001,
+3100102001,[CONTOH] Meja Kerja,5,3100102,Mebeler
+3100102002,[CONTOH] Kursi,5,3100102,Mebeler
+3100203001,[CONTOH] Personal Computer,5,3100102,Elektronik
+3100203002,[CONTOH] Proyektor,5,3100102,Elektronik

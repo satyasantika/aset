@@ -2,7 +2,16 @@
 
 namespace App\Providers;
 
+use App\Contracts\PenyimpananBerkas;
+use App\Models\Gedung;
+use App\Models\KategoriRuangan;
+use App\Models\KodefikasiBarang;
+use App\Models\Prodi;
+use App\Models\Ruangan;
 use App\Models\TokenAkses;
+use App\Policies\MasterPolicy;
+use App\Policies\RuanganPolicy;
+use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -18,7 +27,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(PenyimpananBerkas::class, fn () => match (config('berkas.mode')) {
+            'tautan' => new TautanEksternal,
+            default => throw new \RuntimeException('BERKAS_MODE tidak dikenal: '.config('berkas.mode')),
+        });
     }
 
     /**
@@ -27,6 +39,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(fn ($user) => $user->hasRole('super-admin') ? true : null);
+        foreach ([Gedung::class, KategoriRuangan::class, Prodi::class, KodefikasiBarang::class] as $modelMaster) {
+            Gate::policy($modelMaster, MasterPolicy::class);
+        }
+
+        Gate::policy(Ruangan::class, RuanganPolicy::class);
+
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);
         Carbon::setLocale(config('app.locale'));
