@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfil;
+use App\Filament\Pages\Auth\Masuk;
+use App\Http\Middleware\WajibMfaAdmin;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,7 +33,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Masuk::class)
+            ->passwordReset()
+            ->profile(EditProfil::class)
+            ->multiFactorAuthentication([AppAuthentication::make()->recoverable()])
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::FOOTER,
@@ -61,6 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                WajibMfaAdmin::class,
             ]);
     }
 }
