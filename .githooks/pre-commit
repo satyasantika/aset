@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
-# Laravel 13 butuh PHP >= 8.4; bila PHP host lebih lama, jalankan lewat container.
-if php -r 'exit(PHP_VERSION_ID >= 80400 ? 0 : 1);' 2>/dev/null; then
+# Laravel 13 butuh PHP >= 8.3. Bila PHP host terlalu lama, jalankan lewat container aset-php
+# (mount /home/satya/code/aset -> /var/www/html).
+if php -r 'exit(PHP_VERSION_ID >= 80300 && extension_loaded("intl") ? 0 : 1);' 2>/dev/null; then
   run() { "$@"; }
 else
   run() {
-    docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/var/www/html" -w /var/www/html \
-      siman-php:8.4 "$@"
+    docker exec -u "$(id -u)" -e HOME=/tmp -w "/var/www/html/siman-fkip" "${SIMAN_PHP_CONTAINER:-aset-php}" "$@"
   }
 fi
 run ./vendor/bin/pint --test
