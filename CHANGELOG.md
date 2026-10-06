@@ -6,6 +6,18 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.10.0] - 2026-10-15
+
+Fase 10: usulan penghapusan, dasbor, dan laporan.
+
+### Ditambahkan
+- Usulan penghapusan BMN (`USL-{tahun}-{4 digit}`): pengajuan oleh admin, persetujuan/penolakan pejabat penatausahaan, pencatatan SK penghapusan (aset → `dihapus`), `UsulanPenghapusanResource`.
+- Dasbor statistik aset per peran (jumlah, nilai, kondisi, aset per ruangan, peminjaman aktif/terlambat, tiket, DBR) dengan cache berversi dan widget `StatistikAsetWidget`/`RincianAsetWidget`.
+- Halaman **Laporan** (`/admin/laporan`) dengan ekspor terantre (`ekspor`, disk `tmp`): rekonsiliasi kode+NUP, daftar Rusak Berat & hilang, riwayat peminjaman, rekap pemeliharaan, log aktivitas, dan tiga tabel DKPS LAMDIK (`docs/FORMAT-DKPS.md`). Data pribadi disamarkan bagi pengunduh tanpa izin `data-pribadi.lihat`.
+
+### Diubah
+- Transisi status aset `diusulkan_hapus` → `hilang` diizinkan.
+
 ## [0.9.0] - 2026-10-14
 
 Fase 9: DBR/DBL & inventarisasi.
