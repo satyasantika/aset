@@ -6,6 +6,15 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.11.0] - 2026-10-17
+
+Fase 11: notifikasi, penjadwal, dan API untuk Surat.
+
+### Ditambahkan
+- Notifikasi (antrean `notifikasi`, mail + database, setelah commit): pengajuan peminjaman baru, keputusan peminjaman, peminjaman terlambat, pengingat pengambilan, mutasi diajukan/diputuskan, laporan kerusakan baru, DBR dan berita acara menunggu pengesahan, pengingat inventarisasi. Saluran WhatsApp opsional (`WHATSAPP_ENABLED`) untuk pengingat terlambat/pengambilan. Pemicu terpusat di `PemicuNotifikasi`; penerima di `Penerima` (tanpa PIC → admin BMN).
+- Tugas terjadwal (withoutOverlapping + onOneServer): `aset:pengingat-terlambat`, `aset:pengingat-pengambilan`, `aset:tandai-dbr-usang`, `aset:periksa-tautan`, `aset:pengingat-inventarisasi`, `aset:pangkas-peminjaman` (anonimkan data pribadi setelah retensi, BR-23), `aset:bersihkan-tmp`.
+- API v1 (`docs/API.md`): `GET /api/v1/ruangan`, `GET /api/v1/ruangan/{kode}/jadwal`, `POST /api/v1/ruangan/{kode}/pemakaian` (Sanctum, ability `ruangan:baca`/`ruangan:pakai`, 60/menit/token, cek bentrok transaksional, idempoten via `referensi_eksternal`), tabel `pemakaian_ruangan`, dan pengelolaan token oleh super-admin (Sistem → Token API).
+
 ## [0.10.0] - 2026-10-15
 
 Fase 10: usulan penghapusan, dasbor, dan laporan.
