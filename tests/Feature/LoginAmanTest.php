@@ -121,3 +121,26 @@ it('mengeluarkan perangkat lain saat kata sandi diganti', function () {
         ->and(Hash::check('baru-rahasia-456', $user->password))->toBeTrue();
     Event::assertDispatched(OtherDeviceLogout::class);
 });
+
+it('civitas dapat masuk dan dialihkan ke /pinjam, tetapi tetap tidak dapat membuka panel', function () {
+    $user = akun('civitas');
+
+    Livewire::test(Masuk::class)
+        ->fillForm(['email' => $user->email, 'password' => 'rahasia-123'])
+        ->call('authenticate')
+        ->assertHasNoFormErrors()
+        ->assertRedirect(route('pinjam'));
+
+    $this->assertAuthenticatedAs($user);
+    $this->get('/admin')->assertForbidden();
+    $this->get('/pinjam')->assertOk();
+});
+
+it('civitas dengan kata sandi salah atau nonaktif tidak masuk', function () {
+    $nonaktif = akun('civitas', ['aktif' => false]);
+
+    Livewire::test(Masuk::class)->fillForm(['email' => $nonaktif->email, 'password' => 'rahasia-123'])->call('authenticate')->assertHasFormErrors(['email']);
+    Livewire::test(Masuk::class)->fillForm(['email' => akun('civitas')->email, 'password' => 'salah'])->call('authenticate')->assertHasFormErrors(['email']);
+
+    $this->assertGuest();
+});

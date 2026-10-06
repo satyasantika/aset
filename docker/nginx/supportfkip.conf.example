@@ -1,0 +1,18 @@
+# Contoh blok pada nginx host untuk supportfkip.unsil.ac.id (TLS dihentikan di sini). Sesuaikan port WEB_PORT kontainer web.
+# Aplikasi lain di host yang sama tidak terpengaruh; hanya path /aset/ yang diteruskan.
+
+location = /aset { return 301 /aset/; }
+
+location /aset/ {
+    # Menghapus prefix /aset (trailing slash pada proxy_pass); aplikasi membangun URL dari APP_URL.
+    proxy_pass http://127.0.0.1:8080/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Prefix /aset;
+    proxy_read_timeout 60s;
+    client_max_body_size 10m;
+}

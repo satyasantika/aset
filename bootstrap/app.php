@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di belakang reverse proxy (TLS dihentikan di proxy): percayai header X-Forwarded-*.
+        $middleware->trustProxies(at: '*');
         $middleware->append(HeaderKeamanan::class);
         $middleware->alias([
             'abilities' => CheckAbilities::class,

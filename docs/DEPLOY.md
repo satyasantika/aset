@@ -25,6 +25,16 @@ aset.fkip.unsil.ac.id {
 }
 ```
 
+## 1a. Alamat produksi: https://supportfkip.unsil.ac.id/aset (subpath)
+
+Sistem dipasang di **subpath `/aset`** pada host `supportfkip.unsil.ac.id` yang dipakai bersama aplikasi lain.
+- `APP_URL=https://supportfkip.unsil.ac.id/aset` — aplikasi membangun semua URL (rute, Vite/Filament, endpoint Livewire,
+  tautan di surel/QR) dari nilai ini (`App\Support\UrlDasar`, diuji di `SubpathTest`). `SESSION_PATH=/aset` dan
+  `SESSION_COOKIE=siman_session` agar cookie tidak bocor ke/bertabrakan dengan aplikasi lain di host yang sama.
+- Reverse proxy host **menghapus prefix** `/aset` saat meneruskan ke kontainer `web` (lihat `docker/nginx/supportfkip.conf.example`).
+- QR pada label berisi URL publik `https://supportfkip.unsil.ac.id/aset/a/{id}`; label dicetak setelah `APP_URL` final.
+- Rute `/up` dan `/aset/api/health` dapat dipakai untuk pemantauan; API Surat: `https://supportfkip.unsil.ac.id/aset/api/v1/...`.
+
 ## 2. Pemasangan pertama
 
 ```bash

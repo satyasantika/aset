@@ -1,0 +1,40 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan Admin BMN — SIMAN FKIP</title><link rel="stylesheet" href="panduan.css"></head><body>
+<header><h1>Panduan: Admin BMN</h1><p class="lead" style="color:#cbd5e1">Penatausahaan aset secara menyeluruh: dari pendaftaran sampai laporan.</p><nav class="peran"><a href="../">Beranda</a><a href="umum.html">Semua pengguna</a><a href="civitas.html">Civitas (dosen dan ormawa)</a><a href="pic.html">PIC Ruangan</a><a href="admin.html" class="aktif">Admin BMN</a><a href="pejabat.html">Pejabat Penatausahaan</a><a href="pimpinan.html">Pimpinan</a><a href="super.html">Super Admin</a></nav></header><main>
+<h2>1. Dasbor dan peringatan</h2>
+<p>Dasbor menampilkan seluruh fakultas: jumlah dan nilai aset, kondisi, pinjaman, tiket, DBR, serta <strong>peringatan inventarisasi</strong> (PMK 181/2016 Pasal 19) bila inventarisasi terakhir yang disahkan melewati ambang.</p>
+<figure><img src="img/admin-dashboard.jpg" alt="Dasbor admin BMN" loading="lazy"><figcaption>Dasbor admin BMN</figcaption></figure>
+<h2>2. Master data</h2>
+<ul><li><strong>Ruangan</strong>, <strong>Gedung</strong>, <strong>Kategori ruangan</strong>, <strong>Program studi</strong>, dan <strong>Kodefikasi barang</strong> (impor CSV) di grup <em>Master data</em>. Pada Ruangan, tambahkan PIC dan prodi pemakai, luas, kapasitas, serta atribut K3L.</li><li><strong>Pengguna</strong>: buat akun <code>@unsil.ac.id</code> dan beri peran (Anda dapat menugaskan PIC; akun admin hanya diubah super-admin).</li></ul>
+<figure><img src="img/admin-ruangan.jpg" alt="Daftar ruangan" loading="lazy"><figcaption>Daftar ruangan</figcaption></figure>
+<figure><img src="img/admin-pengguna.jpg" alt="Daftar pengguna" loading="lazy"><figcaption>Daftar pengguna</figcaption></figure>
+<figure><img src="img/admin-kodefikasi.jpg" alt="Kodefikasi barang" loading="lazy"><figcaption>Kodefikasi barang</figcaption></figure>
+<h2>3. Mendaftarkan aset</h2>
+<ul><li><strong>Aset</strong> → <strong>Buat</strong> untuk satu barang, atau <strong>Daftarkan massal</strong> (mis. 20 kursi dengan NUP berurutan). Kode barang + NUP harus unik; barang belum tercatat di aplikasi BMN memakai <em>kode internal</em>. Isi nilai, tanggal, dan sumber perolehan untuk rekonsiliasi.</li><li>Foto/dokumen berupa <strong>tautan</strong> (tidak ada unggah berkas). Status dan kondisi diubah lewat aksi pada baris barang.</li></ul>
+<figure><img src="img/admin-aset.jpg" alt="Daftar aset" loading="lazy"><figcaption>Daftar aset</figcaption></figure>
+<figure><img src="img/admin-aset-baru.jpg" alt="Formulir aset baru" loading="lazy"><figcaption>Formulir aset baru</figcaption></figure>
+<h2>4. Label QR</h2>
+<p>Pilih barang → <strong>Cetak label</strong>. Label yang perlu dicetak ulang (hasil migrasi) terkumpul di <em>Label perlu cetak ulang</em>.</p>
+<figure><img src="img/admin-label-ulang.jpg" alt="Label perlu dicetak ulang" loading="lazy"><figcaption>Label perlu dicetak ulang</figcaption></figure>
+<h2>5. Mutasi lokasi</h2>
+<p>Pengajuan PIC muncul di <strong>Mutasi lokasi</strong>. <strong>Setujui</strong> (lokasi berubah, riwayat tercatat, DBR ruangan asal &amp; tujuan menjadi <em>perlu diperbarui</em>) atau <strong>Tolak</strong> dengan alasan.</p>
+<figure><img src="img/admin-mutasi.jpg" alt="Daftar mutasi" loading="lazy"><figcaption>Daftar mutasi</figcaption></figure>
+<figure><img src="img/admin-mutasi-detail.jpg" alt="Detail mutasi" loading="lazy"><figcaption>Detail mutasi</figcaption></figure>
+<h2>6. Peminjaman</h2>
+<p>Pantau tab Aktif/Terlambat/Diajukan/Riwayat. Gunakan <strong>Catat permohonan pihak luar</strong> untuk permohonan eksternal (diteruskan ke pejabat penatausahaan). Data pribadi peminjam dianonimkan otomatis setelah masa retensi.</p>
+<figure><img src="img/admin-peminjaman.jpg" alt="Daftar peminjaman" loading="lazy"><figcaption>Daftar peminjaman</figcaption></figure>
+<h2>7. DBR/DBL</h2>
+<p><strong>Bangkitkan DBR/DBL</strong> per ruangan (atau DBL untuk barang berlokasi lainnya) → PIC menyetujui → pejabat mengesahkan → cetak PDF.</p>
+<figure><img src="img/admin-dbr.jpg" alt="Daftar DBR/DBL" loading="lazy"><figcaption>Daftar DBR/DBL</figcaption></figure>
+<h2>8. Inventarisasi</h2>
+<p><strong>Inventarisasi</strong> → buat periode → <strong>Buka periode</strong> (hanya satu berjalan) → <strong>Tugaskan petugas</strong> per ruangan. Setelah PIC memindai: <strong>Tutup periode</strong> (berita acara tersusun; unduh PDF dan Excel selisih), <strong>Tetapkan hilang</strong> untuk barang yang tidak ditemukan setelah diverifikasi, lalu pejabat mengesahkan.</p>
+<figure><img src="img/admin-inventarisasi.jpg" alt="Daftar periode" loading="lazy"><figcaption>Daftar periode</figcaption></figure>
+<figure><img src="img/admin-inventarisasi-detail.jpg" alt="Detail periode" loading="lazy"><figcaption>Detail periode</figcaption></figure>
+<h2>9. Penghapusan</h2>
+<p><strong>Penghapusan</strong> → buat usulan dari barang RB/hilang → <strong>Ajukan</strong> → pejabat <strong>Setujui internal</strong> (barang menjadi <em>diusulkan hapus</em>) → setelah SK terbit <strong>Catat SK penghapusan</strong> (nomor &amp; tanggal wajib; barang menjadi <em>dihapus</em>, tidak dihapus permanen).</p>
+<figure><img src="img/admin-penghapusan.jpg" alt="Daftar usulan" loading="lazy"><figcaption>Daftar usulan</figcaption></figure>
+<figure><img src="img/admin-penghapusan-detail.jpg" alt="Detail usulan" loading="lazy"><figcaption>Detail usulan</figcaption></figure>
+<h2>10. Laporan dan log</h2>
+<p><strong>Laporan</strong>: rekonsiliasi (kode + NUP), daftar RB &amp; hilang, riwayat peminjaman, rekap pemeliharaan, DKPS LAMDIK, dan log aktivitas. Ekspor diproses di latar belakang dan diunduh lewat notifikasi (berkas dihapus ≤ 24 jam). <strong>Log aktivitas</strong> mencatat siapa melakukan apa.</p>
+<figure><img src="img/admin-laporan.jpg" alt="Halaman laporan" loading="lazy"><figcaption>Halaman laporan</figcaption></figure>
+<figure><img src="img/admin-log.jpg" alt="Log aktivitas" loading="lazy"><figcaption>Log aktivitas</figcaption></figure>
+</main><footer>SIMAN FKIP — Sistem Informasi Manajemen Aset FKIP UNSIL. Tangkapan layar memakai data contoh (UAT).</footer></body></html>

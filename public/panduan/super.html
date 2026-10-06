@@ -1,0 +1,18 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan Super Admin — SIMAN FKIP</title><link rel="stylesheet" href="panduan.css"></head><body>
+<header><h1>Panduan: Super Admin</h1><p class="lead" style="color:#cbd5e1">Pengaturan sistem, akun pengguna, token API, dan log aktivitas.</p><nav class="peran"><a href="../">Beranda</a><a href="umum.html">Semua pengguna</a><a href="civitas.html">Civitas (dosen dan ormawa)</a><a href="pic.html">PIC Ruangan</a><a href="admin.html">Admin BMN</a><a href="pejabat.html">Pejabat Penatausahaan</a><a href="pimpinan.html">Pimpinan</a><a href="super.html" class="aktif">Super Admin</a></nav></header><main>
+<h2>1. Dasbor</h2>
+<p>Super-admin memiliki seluruh hak, termasuk pengaturan sistem. Akun super-admin wajib MFA.</p>
+<figure><img src="img/super-dashboard.jpg" alt="Dasbor super-admin" loading="lazy"><figcaption>Dasbor super-admin</figcaption></figure>
+<h2>2. Pengaturan sistem</h2>
+<p><strong>Pengaturan sistem</strong>: identitas instansi dan penandatangan (kop dokumen), <em>toggle</em> fitur (tambah aset, ubah kondisi, mutasi, peminjaman, tahan mutasi saat inventarisasi), ambang pengingat inventarisasi, retensi peminjaman (bulan), dan maksimum hari pinjam.</p>
+<figure><img src="img/super-pengaturan.jpg" alt="Pengaturan sistem" loading="lazy"><figcaption>Pengaturan sistem</figcaption></figure>
+<h2>3. Pengguna dan peran</h2>
+<p><strong>Pengguna</strong>: buat/ubah akun, aktifkan atau nonaktifkan (akun tidak dihapus), dan beri peran: super-admin, admin-bmn, pejabat-penatausahaan, pic-ruangan, pimpinan, civitas.</p>
+<figure><img src="img/super-pengguna.jpg" alt="Daftar pengguna" loading="lazy"><figcaption>Daftar pengguna</figcaption></figure>
+<h2>4. Token API untuk Surat</h2>
+<p><strong>Token API</strong> → <strong>Buat token</strong>: isi nama klien dan ability (<code>ruangan:baca</code>, <code>ruangan:pakai</code>). Teks token tampil <strong>sekali</strong> — salin dan serahkan ke pengelola Surat. Cabut token dengan menghapusnya. Dokumentasi endpoint: <code>docs/API.md</code>.</p>
+<figure><img src="img/super-token.jpg" alt="Token API" loading="lazy"><figcaption>Token API</figcaption></figure>
+<h2>5. Log aktivitas dan antrean</h2>
+<p><strong>Log aktivitas</strong> memuat siapa melakukan apa dan kapan (data rahasia disamarkan). Antrean dan tugas latar dipantau di <strong>/horizon</strong> (khusus super-admin).</p>
+<figure><img src="img/super-log.jpg" alt="Log aktivitas" loading="lazy"><figcaption>Log aktivitas</figcaption></figure>
+</main><footer>SIMAN FKIP — Sistem Informasi Manajemen Aset FKIP UNSIL. Tangkapan layar memakai data contoh (UAT).</footer></body></html>

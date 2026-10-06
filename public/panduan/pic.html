@@ -1,0 +1,33 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan PIC Ruangan — SIMAN FKIP</title><link rel="stylesheet" href="panduan.css"></head><body>
+<header><h1>Panduan: PIC Ruangan</h1><p class="lead" style="color:#cbd5e1">Pindai, ubah kondisi, pinjamkan, kembalikan, DBR, inventarisasi, dan pemeliharaan.</p><nav class="peran"><a href="../">Beranda</a><a href="umum.html">Semua pengguna</a><a href="civitas.html">Civitas (dosen dan ormawa)</a><a href="pic.html" class="aktif">PIC Ruangan</a><a href="admin.html">Admin BMN</a><a href="pejabat.html">Pejabat Penatausahaan</a><a href="pimpinan.html">Pimpinan</a><a href="super.html">Super Admin</a></nav></header><main>
+<h2>1. Dasbor</h2>
+<p>Setelah masuk, <strong>Dasbor</strong> menampilkan ringkasan aset di ruangan Anda: jumlah, nilai, kondisi, pinjaman aktif/terlambat, tiket terbuka, dan DBR yang perlu diperbarui. Anda mengelola <strong>hanya ruangan yang ditugaskan</strong>; barang ruangan lain hanya dapat dilihat.</p>
+<figure><img src="img/pic-dashboard.jpg" alt="Dasbor PIC" loading="lazy"><figcaption>Dasbor PIC</figcaption></figure>
+<h2>2. Memindai barang</h2>
+<ul><li>Buka <strong>/pindai</strong> di ponsel dan izinkan kamera, atau ketik kode label lalu <strong>Cari</strong>. Label baru (QR) maupun label lama (<code>KATEGORI-KODE-UNIT</code>, nomor BMN/NUP) dikenali.</li><li>Dari hasil pindai Anda dapat mengubah kondisi, mengajukan mutasi, atau melaporkan kerusakan.</li></ul>
+<figure><img src="img/pic-pindai.jpg" alt="Halaman pindai" loading="lazy"><figcaption>Halaman pindai</figcaption></figure>
+<h2>3. Daftar aset dan ubah kondisi</h2>
+<ul><li>Menu <strong>Aset</strong> memuat seluruh barang (filter dan pencarian tersedia). Pada baris barang di ruangan Anda pilih <strong>Ubah kondisi</strong>: B (Baik), RR (Rusak Ringan), RB (Rusak Berat) beserta catatan. Semua perubahan tercatat di riwayat.</li><li>Beberapa barang sekaligus: centang lalu pakai aksi massal. Barang di ruangan lain akan ditolak (403).</li></ul>
+<figure><img src="img/pic-aset.jpg" alt="Daftar aset" loading="lazy"><figcaption>Daftar aset</figcaption></figure>
+<figure><img src="img/pic-ubah-kondisi.jpg" alt="Dialog Ubah kondisi" loading="lazy"><figcaption>Dialog Ubah kondisi</figcaption></figure>
+<h2>4. Meminjamkan dan menerima pengembalian</h2>
+<ul><li><strong>Keranjang</strong> (<code>/keranjang</code>): tambahkan barang, isi peminjam, keperluan, dan rencana kembali. Keranjang bersifat semua-atau-tidak-sama-sekali; barang bermasalah disebutkan namanya.</li><li>Menu <strong>Peminjaman</strong>: tab Aktif/Terlambat/Diajukan/Riwayat. Pengajuan civitas → <strong>Setujui/Tolak</strong>, lalu <strong>Serahkan barang</strong> saat diambil dan <strong>Terima pengembalian</strong> (isi kondisi saat kembali). Kondisi RR/RB otomatis membuka tiket pemeliharaan.</li></ul>
+<figure><img src="img/pic-keranjang.jpg" alt="Keranjang peminjaman" loading="lazy"><figcaption>Keranjang peminjaman</figcaption></figure>
+<figure><img src="img/pic-peminjaman.jpg" alt="Daftar peminjaman" loading="lazy"><figcaption>Daftar peminjaman</figcaption></figure>
+<figure><img src="img/pic-peminjaman-detail.jpg" alt="Detail peminjaman dan aksinya" loading="lazy"><figcaption>Detail peminjaman dan aksinya</figcaption></figure>
+<h2>5. Pemeliharaan</h2>
+<p><strong>Pemeliharaan</strong> memuat tiket kerusakan (dari laporan publik atau dibuka PIC). Alur: <strong>Proses</strong> → <em>Menunggu suku cadang</em> → <strong>Selesaikan</strong> (tindakan, biaya, kondisi akhir) atau <em>Tidak dapat diperbaiki</em>. Barang yang diperbaiki tidak dapat dipinjam.</p>
+<figure><img src="img/pic-pemeliharaan.jpg" alt="Tiket pemeliharaan" loading="lazy"><figcaption>Tiket pemeliharaan</figcaption></figure>
+<h2>6. Mutasi lokasi</h2>
+<p><strong>Mutasi lokasi</strong> → <strong>Ajukan mutasi</strong> dari ruangan Anda ke ruangan tujuan, pilih barang dan isi alasan. Admin BMN memutuskan; PIC asal dan tujuan diberi tahu. Mutasi ditahan saat ruangan diinventarisasi.</p>
+<figure><img src="img/pic-mutasi.jpg" alt="Daftar mutasi" loading="lazy"><figcaption>Daftar mutasi</figcaption></figure>
+<h2>7. DBR/DBL</h2>
+<p><strong>DBR / DBL</strong> → <strong>Bangkitkan DBR/DBL</strong> untuk ruangan Anda, periksa daftar, lalu <strong>Setujui (tanda tangan PIC)</strong>. Pejabat penatausahaan kemudian mengesahkan; PDF dapat dicetak kapan saja. Jika barang di ruangan berubah, versi yang disahkan ditandai <em>perlu diperbarui</em>.</p>
+<figure><img src="img/pic-dbr.jpg" alt="Daftar DBR" loading="lazy"><figcaption>Daftar DBR</figcaption></figure>
+<figure><img src="img/pic-dbr-detail.jpg" alt="Detail DBR" loading="lazy"><figcaption>Detail DBR</figcaption></figure>
+<h2>8. Inventarisasi ruangan</h2>
+<p>Saat admin menugaskan Anda, buka <strong>Inventarisasi</strong> → ruangan → <strong>Buka pemindaian</strong>. Pindai tiap barang (ditemukan / kondisi berubah), catat temuan berlebih, pantau progres, lalu <strong>Selesai ruangan</strong>; barang yang tidak terpindai menjadi <em>tidak ditemukan</em>.</p>
+<figure><img src="img/pic-inventarisasi.jpg" alt="Daftar periode inventarisasi" loading="lazy"><figcaption>Daftar periode inventarisasi</figcaption></figure>
+<h2>9. Cetak label</h2>
+<p>Pada <strong>Aset</strong> centang barang → <strong>Cetak label</strong> (PDF berisi QR). Label hasil migrasi yang <strong>perlu dicetak ulang</strong> ada di menu <em>Label perlu cetak ulang</em>; tandai setelah ditempel.</p>
+</main><footer>SIMAN FKIP — Sistem Informasi Manajemen Aset FKIP UNSIL. Tangkapan layar memakai data contoh (UAT).</footer></body></html>

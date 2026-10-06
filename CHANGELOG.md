@@ -6,6 +6,13 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+### Ditambahkan
+- Landing page (`/`) dan panduan HTML per peran dengan tangkapan layar (`public/panduan/*.html`; pembangun: `scripts/panduan/`).
+- Dukungan pemasangan di subpath `https://supportfkip.unsil.ac.id/aset` (`APP_URL` berpath, `UrlDasar`, trusted proxy, cookie sesi `siman_session` berpath `/aset`, contoh konfigurasi proxy `docker/nginx/supportfkip.conf.example`).
+
+### Diperbaiki
+- Civitas kini dapat masuk lewat halaman login dan dialihkan ke `/pinjam` (sebelumnya tidak ada jalur login bagi civitas); akses panel `/admin` tetap tertutup bagi mereka.
+
 ## [1.0.0-rc.1] - 2026-10-18
 
 Fase 12: pengerasan, produksi, dan persiapan cutover. Rilis kandidat — `v1.0.0` ditandai setelah langkah manusia

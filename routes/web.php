@@ -12,9 +12,7 @@ use App\Livewire\Pindai;
 use App\Livewire\PinjamanSaya;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'landing')->name('beranda');
 
 // Halaman login tunggal ada di panel; alias ini dipakai middleware `auth` bila tamu membuka rute terlindungi.
 Route::get('/login', fn () => redirect('/admin/login'))->name('login');

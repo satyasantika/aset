@@ -28,6 +28,7 @@ use App\Policies\TiketPemeliharaanPolicy;
 use App\Policies\UsulanPenghapusanPolicy;
 use App\Services\TautanEksternal;
 use App\Support\PemicuNotifikasi;
+use App\Support\UrlDasar;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -75,6 +76,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(PeriodeInventarisasi::class, PeriodeInventarisasiPolicy::class);
         Gate::policy(InventarisasiRuangan::class, PeriodeInventarisasiPolicy::class);
         Gate::policy(TiketPemeliharaan::class, TiketPemeliharaanPolicy::class);
+
+        UrlDasar::terapkan();
 
         PemicuNotifikasi::daftarkan();
 
