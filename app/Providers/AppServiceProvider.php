@@ -3,20 +3,25 @@
 namespace App\Providers;
 
 use App\Contracts\PenyimpananBerkas;
+use App\Models\Aset;
 use App\Models\Gedung;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
 use App\Models\Prodi;
 use App\Models\Ruangan;
 use App\Models\TokenAkses;
+use App\Policies\AsetPolicy;
 use App\Policies\MasterPolicy;
 use App\Policies\RuanganPolicy;
 use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 
@@ -43,7 +48,10 @@ class AppServiceProvider extends ServiceProvider
             Gate::policy($modelMaster, MasterPolicy::class);
         }
 
+        RateLimiter::for('lookup', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
         Gate::policy(Ruangan::class, RuanganPolicy::class);
+        Gate::policy(Aset::class, AsetPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);
