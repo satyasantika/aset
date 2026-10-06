@@ -6,7 +6,7 @@ if php -r 'exit(PHP_VERSION_ID >= 80300 && extension_loaded("intl") ? 0 : 1);' 2
   run() { "$@"; }
 else
   run() {
-    docker exec -u "$(id -u)" -e HOME=/tmp -w "/var/www/html/siman-fkip" "${SIMAN_PHP_CONTAINER:-aset-php}" "$@"
+    docker exec -u "$(id -u)" -e HOME=/tmp -w "/var/www/html" "${SIMAN_PHP_CONTAINER:-aset-php}" "$@"
   }
 fi
 run ./vendor/bin/pint --test

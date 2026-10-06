@@ -36,7 +36,6 @@
             'admin' => ['Admin BMN', 'Aset, mutasi, inventarisasi, penghapusan, dan laporan.'],
             'pejabat' => ['Pejabat Penatausahaan', 'Mengesahkan DBR, berita acara, dan usulan penghapusan.'],
             'pimpinan' => ['Pimpinan', 'Dasbor dan laporan (tanpa data pribadi).'],
-            'super' => ['Super Admin', 'Pengaturan sistem, pengguna, token API, log aktivitas.'],
         ] as $peran => [$nama, $ket])
             <a class="kartu" href="{{ url("panduan/{$peran}.html") }}"><strong>{{ $nama }}</strong><span>{{ $ket }}</span></a>
         @endforeach
