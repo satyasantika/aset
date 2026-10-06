@@ -15,10 +15,13 @@ use App\Policies\MasterPolicy;
 use App\Policies\RuanganPolicy;
 use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 
@@ -44,6 +47,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ([Gedung::class, KategoriRuangan::class, Prodi::class, KodefikasiBarang::class] as $modelMaster) {
             Gate::policy($modelMaster, MasterPolicy::class);
         }
+
+        RateLimiter::for('lookup', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         Gate::policy(Ruangan::class, RuanganPolicy::class);
         Gate::policy(Aset::class, AsetPolicy::class);

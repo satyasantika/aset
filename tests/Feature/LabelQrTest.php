@@ -201,5 +201,5 @@ it('aksi massal Cetak label menyimpan pilihan di sesi lalu mengalihkan ke pencet
 it('rute cetak memakai pembatas laju', function () {
     $rute = app('router')->getRoutes()->getByName('cetak.label');
 
-    expect($rute->gatherMiddleware())->toContain('throttle:30,1')->toContain('auth');
+    expect($rute->gatherMiddleware())->toContain('throttle:60,1')->toContain('auth');
 });
