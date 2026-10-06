@@ -6,6 +6,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.8.0] - 2026-10-13
+
+Fase 8: pemeliharaan & lapor kerusakan.
+
+### Ditambahkan
+- Tiket pemeliharaan (`TKT-{tahun}-{4 digit}`): `BukaTiketPemeliharaan` (idempoten per sumber, opsi aset `dalam_perbaikan`), `UbahStatusTiket`, `SelesaikanTiket` (tindakan, biaya DECIMAL, kondisi akhir → `UbahKondisiAset`, aset kembali aktif), `TiketPemeliharaanResource` (PIC: ruangannya; data pelapor BR-23) dan stub F6.4 terisi.
+- Lapor kerusakan publik `/lapor-kerusakan/{aset}` (deskripsi wajib, nama/kontak opsional, honeypot, 5/jam/IP, hash IP HMAC harian tanpa IP mentah) dan pelaporan civitas/staf dari `/pindai`; event `LaporanKerusakanDiterima` untuk notifikasi F11.
+
 ## [0.7.0] - 2026-10-12
 
 Fase 7: migrasi data SIMAN-FKIP-2.

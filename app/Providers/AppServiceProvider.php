@@ -11,12 +11,14 @@ use App\Models\Mutasi;
 use App\Models\Peminjaman;
 use App\Models\Prodi;
 use App\Models\Ruangan;
+use App\Models\TiketPemeliharaan;
 use App\Models\TokenAkses;
 use App\Policies\AsetPolicy;
 use App\Policies\MasterPolicy;
 use App\Policies\MutasiPolicy;
 use App\Policies\PeminjamanPolicy;
 use App\Policies\RuanganPolicy;
+use App\Policies\TiketPemeliharaanPolicy;
 use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -53,11 +55,13 @@ class AppServiceProvider extends ServiceProvider
         }
 
         RateLimiter::for('lookup', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('lapor', fn (Request $request) => Limit::perHour(5)->by($request->ip()));
 
         Gate::policy(Ruangan::class, RuanganPolicy::class);
         Gate::policy(Aset::class, AsetPolicy::class);
         Gate::policy(Mutasi::class, MutasiPolicy::class);
         Gate::policy(Peminjaman::class, PeminjamanPolicy::class);
+        Gate::policy(TiketPemeliharaan::class, TiketPemeliharaanPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);
