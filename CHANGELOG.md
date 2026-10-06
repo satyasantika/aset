@@ -6,6 +6,16 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.9.0] - 2026-10-14
+
+Fase 9: DBR/DBL & inventarisasi.
+
+### Ditambahkan
+- DBR/DBL berbasis snapshot: `BangkitkanDbr`, `SetujuiDbrOlehPic`, `SahkanDbr` (hash isi daftar menjamin yang disahkan = yang disetujui PIC), `KembalikanDbr`, penanda `perlu_diperbarui` otomatis dari observer `Aset` dan mutasi, PDF dari snapshot (`/cetak/dbr/{id}`), dan `DbrResource`.
+- Periode inventarisasi (satu berjalan, lock Redis), penugasan petugas per ruangan, penahanan mutasi pada ruangan yang diinventarisasi (BR-14, mengikuti toggle).
+- Halaman `/inventarisasi/{periode}/{ruangan}` (pindai QR/label lama, koreksi kondisi, temuan berlebih dengan foto tautan, progres, selesai ruangan → sisa `tidak_ditemukan`).
+- Penutupan periode (kondisi berubah diterapkan dengan riwayat sumber `inventarisasi`), berita acara (snapshot, PDF, Excel selisih), pengesahan pejabat, verifikasi aset hilang oleh admin, dan widget peringatan inventarisasi (BR-15).
+
 ## [0.8.0] - 2026-10-13
 
 Fase 8: pemeliharaan & lapor kerusakan.
