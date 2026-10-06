@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\PenyimpananBerkas;
 use App\Models\Gedung;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
@@ -10,6 +11,7 @@ use App\Models\Ruangan;
 use App\Models\TokenAkses;
 use App\Policies\MasterPolicy;
 use App\Policies\RuanganPolicy;
+use App\Services\TautanEksternal;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -25,7 +27,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(PenyimpananBerkas::class, fn () => match (config('berkas.mode')) {
+            'tautan' => new TautanEksternal,
+            default => throw new \RuntimeException('BERKAS_MODE tidak dikenal: '.config('berkas.mode')),
+        });
     }
 
     /**

@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $this->call([PeranDanIzinSeeder::class, KategoriRuanganSeeder::class, ProdiSeeder::class, GedungSeeder::class, KodefikasiBarangSeeder::class]);
+        $this->call([PeranDanIzinSeeder::class, KategoriRuanganSeeder::class, ProdiSeeder::class, GedungSeeder::class, KodefikasiBarangSeeder::class, PengaturanSeeder::class]);
 
         // Akun super-admin contoh hanya untuk lingkungan lokal; produksi dibuat manual (tanpa kata sandi bawaan).
         if (app()->environment('local')) {

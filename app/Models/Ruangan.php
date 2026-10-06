@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\MembersihkanCacheMaster;
+use App\Concerns\MemilikiTautanBerkas;
 use App\Concerns\TercatatAktivitas;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class Ruangan extends Model
 {
-    use HasUuids, MembersihkanCacheMaster, SoftDeletes, TercatatAktivitas;
+    use HasUuids, MembersihkanCacheMaster, MemilikiTautanBerkas, SoftDeletes, TercatatAktivitas;
 
     protected $table = 'ruangan';
 
