@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Gedung;
+use App\Models\KategoriRuangan;
+use App\Models\Prodi;
 use App\Models\TokenAkses;
+use App\Policies\MasterPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -27,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(fn ($user) => $user->hasRole('super-admin') ? true : null);
+        foreach ([Gedung::class, KategoriRuangan::class, Prodi::class] as $modelMaster) {
+            Gate::policy($modelMaster, MasterPolicy::class);
+        }
+
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);
         Date::use(CarbonImmutable::class);
         Carbon::setLocale(config('app.locale'));
