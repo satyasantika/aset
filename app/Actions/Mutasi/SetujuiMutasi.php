@@ -25,6 +25,8 @@ class SetujuiMutasi
     {
         Gate::forUser($pelaku)->authorize('putuskan', $mutasi);
         Pengaturan::pastikanFitur('mutasi');
+        $mutasi->loadMissing(['asal', 'tujuan']);
+        AjukanMutasi::pastikanTidakDiinventarisasi($mutasi->asal, $mutasi->tujuan);
 
         $idAset = $mutasi->aset()->pluck('aset.id')->sort()->values()->all();
 

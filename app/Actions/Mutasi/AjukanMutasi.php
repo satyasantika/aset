@@ -8,6 +8,7 @@ use App\Models\Aset;
 use App\Models\Mutasi;
 use App\Models\Ruangan;
 use App\Models\User;
+use App\Support\InventarisasiBerjalan;
 use App\Support\NomorTransaksi;
 use App\Support\Pengaturan;
 use Illuminate\Support\Collection;
@@ -29,6 +30,7 @@ class AjukanMutasi
     {
         Gate::forUser($pelaku)->authorize('ajukan', [Mutasi::class, $asal]);
         Pengaturan::pastikanFitur('mutasi');
+        self::pastikanTidakDiinventarisasi($asal, $tujuan);
 
         $ids = collect($asetIds)->unique()->values();
 
@@ -50,6 +52,22 @@ class AjukanMutasi
                 return $mutasi;
             });
         });
+    }
+
+    /** BR-14: mutasi pada ruangan yang sedang diinventarisasi ditahan (mengikuti toggle). */
+    public static function pastikanTidakDiinventarisasi(Ruangan ...$ruangan): void
+    {
+        if (! Pengaturan::fitur('tahan_mutasi_saat_inventarisasi')) {
+            return;
+        }
+
+        foreach ($ruangan as $r) {
+            if (($inv = InventarisasiBerjalan::untukRuangan($r->getKey())) !== null) {
+                throw ValidationException::withMessages([
+                    'aset' => "Ruangan {$r->nama} sedang diinventarisasi (periode \"{$inv->periode->nama}\"); mutasi ditahan sampai inventarisasi ruangan selesai.",
+                ]);
+            }
+        }
     }
 
     /** @param  Collection<int, string>  $ids */

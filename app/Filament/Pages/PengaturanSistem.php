@@ -79,6 +79,7 @@ class PengaturanSistem extends Page
                     Toggle::make('fitur_ubah_kondisi')->label('Ubah kondisi'),
                     Toggle::make('fitur_mutasi')->label('Mutasi lokasi'),
                     Toggle::make('fitur_peminjaman')->label('Peminjaman'),
+                    Toggle::make('fitur_tahan_mutasi_saat_inventarisasi')->label('Tahan mutasi saat inventarisasi ruangan (BR-14)'),
                 ]),
                 Section::make('Ambang & retensi')->columns(3)->schema([
                     TextInput::make('ambang_pengingat_inventarisasi_tahun')->label('Pengingat inventarisasi (tahun)')->numeric()->required()->minValue(1)->maxValue(5),

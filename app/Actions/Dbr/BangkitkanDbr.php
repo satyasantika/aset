@@ -6,7 +6,7 @@ use App\Enums\StatusDbr;
 use App\Models\DbrVersi;
 use App\Models\Ruangan;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use App\Support\LockAset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -25,7 +25,7 @@ class BangkitkanDbr
         $jenis = $ruangan === null ? DbrVersi::JENIS_DBL : DbrVersi::JENIS_DBR;
         $kunci = 'aset:dbr:'.($ruangan?->getKey() ?? 'dbl');
 
-        return Cache::lock($kunci, 10)->block(5, fn (): DbrVersi => DB::transaction(function () use ($ruangan, $pelaku, $jenis): DbrVersi {
+        return LockAset::satu($kunci, fn (): DbrVersi => DB::transaction(function () use ($ruangan, $pelaku, $jenis): DbrVersi {
             $dasar = DbrVersi::query()->where('jenis', $jenis)
                 ->when($ruangan === null, fn ($q) => $q->whereNull('ruangan_id'), fn ($q) => $q->where('ruangan_id', $ruangan?->getKey()));
 
