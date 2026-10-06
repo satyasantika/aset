@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\MembersihkanCacheStatistik;
 use App\Concerns\MemilikiTautanBerkas;
 use App\Concerns\TercatatAktivitas;
 use App\Enums\StatusTiket;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  */
 class TiketPemeliharaan extends Model
 {
-    use HasUuids, MemilikiTautanBerkas, TercatatAktivitas;
+    use HasUuids, MembersihkanCacheStatistik, MemilikiTautanBerkas, TercatatAktivitas;
 
     public const SUMBER = ['publik', 'civitas', 'pic', 'peminjaman', 'inventarisasi'];
 

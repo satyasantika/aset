@@ -5,6 +5,8 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\EditProfil;
 use App\Filament\Pages\Auth\Masuk;
 use App\Filament\Widgets\PeringatanInventarisasiWidget;
+use App\Filament\Widgets\RincianAsetWidget;
+use App\Filament\Widgets\StatistikAsetWidget;
 use App\Http\Middleware\WajibMfaAdmin;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -56,6 +58,8 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
                 PeringatanInventarisasiWidget::class,
+                StatistikAsetWidget::class,
+                RincianAsetWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

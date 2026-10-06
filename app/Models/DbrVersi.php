@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\MembersihkanCacheStatistik;
 use App\Concerns\TercatatAktivitas;
 use App\Enums\StatusDbr;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  */
 class DbrVersi extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MembersihkanCacheStatistik, TercatatAktivitas;
 
     public const JENIS_DBR = 'dbr';
 
