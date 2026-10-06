@@ -8,4 +8,6 @@ use Laravel\Sanctum\PersonalAccessToken as Induk;
 class TokenAkses extends Induk
 {
     use HasUuids;
+
+    protected $table = 'personal_access_tokens';
 }
