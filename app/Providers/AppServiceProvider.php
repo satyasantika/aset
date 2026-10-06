@@ -4,19 +4,24 @@ namespace App\Providers;
 
 use App\Contracts\PenyimpananBerkas;
 use App\Models\Aset;
+use App\Models\DbrVersi;
 use App\Models\Gedung;
+use App\Models\InventarisasiRuangan;
 use App\Models\KategoriRuangan;
 use App\Models\KodefikasiBarang;
 use App\Models\Mutasi;
 use App\Models\Peminjaman;
+use App\Models\PeriodeInventarisasi;
 use App\Models\Prodi;
 use App\Models\Ruangan;
 use App\Models\TiketPemeliharaan;
 use App\Models\TokenAkses;
 use App\Policies\AsetPolicy;
+use App\Policies\DbrVersiPolicy;
 use App\Policies\MasterPolicy;
 use App\Policies\MutasiPolicy;
 use App\Policies\PeminjamanPolicy;
+use App\Policies\PeriodeInventarisasiPolicy;
 use App\Policies\RuanganPolicy;
 use App\Policies\TiketPemeliharaanPolicy;
 use App\Services\TautanEksternal;
@@ -61,6 +66,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Aset::class, AsetPolicy::class);
         Gate::policy(Mutasi::class, MutasiPolicy::class);
         Gate::policy(Peminjaman::class, PeminjamanPolicy::class);
+        Gate::policy(DbrVersi::class, DbrVersiPolicy::class);
+        Gate::policy(PeriodeInventarisasi::class, PeriodeInventarisasiPolicy::class);
+        Gate::policy(InventarisasiRuangan::class, PeriodeInventarisasiPolicy::class);
         Gate::policy(TiketPemeliharaan::class, TiketPemeliharaanPolicy::class);
 
         Sanctum::usePersonalAccessTokenModel(TokenAkses::class);

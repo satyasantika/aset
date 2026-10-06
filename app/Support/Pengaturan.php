@@ -34,6 +34,7 @@ class Pengaturan
         'fitur_ubah_kondisi' => true,
         'fitur_mutasi' => true,
         'fitur_peminjaman' => true,
+        'fitur_tahan_mutasi_saat_inventarisasi' => true,
         'ambang_pengingat_inventarisasi_tahun' => 4,
         'retensi_peminjaman_bulan' => 36,
         'maks_hari_pinjam' => 14,

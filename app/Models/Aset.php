@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Dbr\TandaiDbrPerluDiperbarui;
 use App\Concerns\MemilikiTautanBerkas;
 use App\Concerns\TercatatAktivitas;
 use App\Enums\KondisiAset;
@@ -70,8 +71,24 @@ class Aset extends Model
         ];
     }
 
+    /** Atribut Aset yang tampil di DBR/DBL; perubahannya membuat versi DBR yang sah menjadi usang (BR-13). */
+    public const ATRIBUT_DBR = [
+        'ruangan_id', 'lokasi_lainnya', 'kondisi', 'status', 'nama', 'merk_tipe', 'tahun_perolehan',
+        'kode_barang', 'nup', 'kode_internal', 'keterangan',
+    ];
+
     protected static function booted(): void
     {
+        static::created(fn (Aset $aset) => self::tandaiDbr($aset));
+
+        static::updated(function (Aset $aset) {
+            if ($aset->wasChanged(self::ATRIBUT_DBR)) {
+                self::tandaiDbr($aset);
+            }
+        });
+
+        static::deleted(fn (Aset $aset) => self::tandaiDbr($aset));
+
         static::saving(function (Aset $aset) {
             $galat = [];
 
@@ -101,6 +118,22 @@ class Aset extends Model
     public function urlPublik(): string
     {
         return url('/a/'.$this->getKey());
+    }
+
+    /** Menandai DBR/DBL lokasi sekarang dan lokasi sebelumnya `perlu_diperbarui` (BR-13). */
+    private static function tandaiDbr(self $aset): void
+    {
+        $tanda = app(TandaiDbrPerluDiperbarui::class);
+
+        $ruangan = collect([$aset->ruangan_id, $aset->wasChanged('ruangan_id') ? $aset->getOriginal('ruangan_id') : null])->filter()->unique();
+
+        foreach ($ruangan as $id) {
+            $tanda->handle((string) $id);
+        }
+
+        if (filled($aset->lokasi_lainnya) || ($aset->wasChanged('lokasi_lainnya') && filled($aset->getOriginal('lokasi_lainnya')))) {
+            $tanda->handle(null);
+        }
     }
 
     /** @return BelongsTo<Ruangan, $this> */

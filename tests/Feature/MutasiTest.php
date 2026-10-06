@@ -90,8 +90,8 @@ it('menjalankan alur penuh: PIC mengajukan, admin menyetujui, lokasi berpindah d
     expect($a->kode_barang)->toBe('3100102002')->and($a->nup)->toBe(21);
 
     // DBR kedua ruangan ditandai perlu diperbarui
-    $spy->shouldHaveReceived('handle')->with($asal->id)->once();
-    $spy->shouldHaveReceived('handle')->with($tujuan->id)->once();
+    $spy->shouldHaveReceived('handle')->with($asal->id)->atLeast()->once();     // dari Action dan observer Aset
+    $spy->shouldHaveReceived('handle')->with($tujuan->id)->atLeast()->once();
 });
 
 it('memberi nomor berurutan MUT-{tahun}-{4 digit}', function () {

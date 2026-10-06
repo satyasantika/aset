@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\BeritaAcaraPdfController;
+use App\Http\Controllers\DbrPdfController;
 use App\Http\Controllers\LabelPdfController;
 use App\Http\Controllers\Publik\LaporKerusakanController;
 use App\Http\Controllers\Publik\LookupAsetController;
 use App\Livewire\AjukanPinjam;
+use App\Livewire\InventarisasiRuanganHalaman;
 use App\Livewire\Keranjang;
 use App\Livewire\Pindai;
 use App\Livewire\PinjamanSaya;
@@ -28,9 +31,13 @@ Route::post('/lapor-kerusakan/{aset}', [LaporKerusakanController::class, 'kirim'
 
 Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::get('/pindai', Pindai::class)->name('pindai');
+    Route::get('/inventarisasi/{periode}/{ruangan}', InventarisasiRuanganHalaman::class)->whereUuid(['periode', 'ruangan'])->name('inventarisasi.ruangan');
     Route::get('/keranjang', Keranjang::class)->name('keranjang');
     Route::get('/pinjam', AjukanPinjam::class)->name('pinjam');
     Route::get('/pinjaman-saya', PinjamanSaya::class)->name('pinjaman-saya');
 
     Route::match(['get', 'post'], '/cetak/label', LabelPdfController::class)->name('cetak.label');
+    Route::get('/cetak/dbr/{dbr}', DbrPdfController::class)->whereUuid('dbr')->name('cetak.dbr');
+    Route::get('/cetak/berita-acara/{periode}', [BeritaAcaraPdfController::class, 'pdf'])->whereUuid('periode')->name('cetak.berita-acara');
+    Route::get('/ekspor/inventarisasi/{periode}/selisih', [BeritaAcaraPdfController::class, 'selisih'])->whereUuid('periode')->name('ekspor.inventarisasi.selisih');
 });

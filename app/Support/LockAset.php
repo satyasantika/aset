@@ -19,6 +19,31 @@ class LockAset
     public const DETIK_TUNGGU = 5;
 
     /**
+     * Lock tunggal bernama (mis. penomoran, pembukaan periode). Gagal mendapatkan lock → galat validasi yang ramah.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $di
+     * @return T
+     */
+    public static function satu(string $kunci, Closure $di, ?int $tungguDetik = null): mixed
+    {
+        $lock = Cache::lock($kunci, self::DETIK_LOCK);
+
+        try {
+            $lock->block($tungguDetik ?? (int) config('aset.lock_tunggu_detik', self::DETIK_TUNGGU));
+        } catch (LockTimeoutException) {
+            throw ValidationException::withMessages(['status' => 'Proses serupa sedang berjalan. Coba lagi sebentar.']);
+        }
+
+        try {
+            return $di();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
      * @template T
      *
      * @param  list<string>  $idAset
