@@ -11,6 +11,7 @@ use App\Enums\SumberPerolehan;
 use App\Filament\RelationManagers\TautanBerkasRelationManager;
 use App\Filament\Resources\Aset\Pages\BuatAset;
 use App\Filament\Resources\Aset\Pages\DaftarAset;
+use App\Filament\Resources\Aset\Pages\LabelPerluCetakUlang;
 use App\Filament\Resources\Aset\Pages\UbahAset;
 use App\Filament\Resources\Aset\RelationManagers\RiwayatKondisiRelationManager;
 use App\Filament\Resources\Aset\RelationManagers\RiwayatLokasiRelationManager;
@@ -32,6 +33,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Navigation\NavigationItem;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -265,6 +267,19 @@ class AsetResource extends Resource
             });
     }
 
+    /** @return array<int, NavigationItem> */
+    public static function getNavigationItems(): array
+    {
+        return [
+            ...parent::getNavigationItems(),
+            NavigationItem::make('Label perlu cetak ulang')
+                ->icon('heroicon-o-qr-code')->group(null)->sort(5)
+                ->url(fn (): string => static::getUrl('label-perlu-cetak-ulang'))
+                ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName().'.label-perlu-cetak-ulang'))
+                ->visible(fn (): bool => auth()->user()?->can('label.cetak') ?? false),
+        ];
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -280,6 +295,7 @@ class AsetResource extends Resource
         return [
             'index' => DaftarAset::route('/'),
             'create' => BuatAset::route('/create'),
+            'label-perlu-cetak-ulang' => LabelPerluCetakUlang::route('/label-perlu-cetak-ulang'),
             'view' => Pages\LihatAset::route('/{record}'),
             'edit' => UbahAset::route('/{record}/edit'),
         ];

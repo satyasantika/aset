@@ -37,7 +37,9 @@ class Siman2Fixture
             $pertama = false;
 
             if ($baris !== []) {
-                $penulis->addRows($baris);
+                // XLSX ditulis posisional: samakan kunci semua baris agar kolom tidak bergeser.
+                $kunci = array_values(array_unique(array_merge(...array_map('array_keys', $baris))));
+                $penulis->addRows(array_map(fn (array $b) => array_map(fn (string $k) => $b[$k] ?? '', array_combine($kunci, $kunci)), $baris));
             }
         }
 
@@ -118,6 +120,35 @@ class Siman2Fixture
                 'pemohon' => 'Petugas Lab 1', 'alasan' => 'Dipindah', 'status' => 'Disetujui', 'tipeMutasi' => 'unit', 'unitIndex' => 2],
             ['id' => 2, 'tanggal' => '09/02/2026 10:00', 'idBarang' => 1, 'kodeBarang' => '83719-1', 'namaBarang' => 'Laptop', 'asal' => 'Lab 1', 'tujuan' => 'Lab 2',
                 'pemohon' => 'x', 'alasan' => 'x', 'status' => 'Pending', 'tipeMutasi' => 'unit', 'unitIndex' => 1],
+        ];
+
+        return $d;
+    }
+
+    /** Lengkap: inventaris + peminjaman + laporan. @return array<string, list<array<string, mixed>>> */
+    public static function lengkap(): array
+    {
+        $d = self::denganInventaris();
+        $d['peminjaman'] = [
+            ['id' => 1, 'idBarang' => 3, 'kodeUnit' => '935464-2', 'unitIndex' => 2, 'namaBarang' => 'Kursi Kuliah', 'lokasiAsal' => 'Lab 2', 'kodeTransaksi' => 'PJM-seed-1',
+                'peminjam' => 'Budi Santoso', 'kontakPeminjam' => '0812-0000-1111', 'keperluan' => 'Rapat mendadak di Aula', 'tanggalPinjam' => '01 Sep 2026, 09.00',
+                'tanggalRencanaKembali' => '2026-09-05', 'tanggalKembaliAktual' => '', 'kondisiSaatKembali' => '', 'status' => 'Dipinjam', 'dicatatOleh' => 'Petugas Lab 1'],
+            ['id' => 2, 'idBarang' => 1, 'kodeUnit' => '83719-1', 'unitIndex' => 1, 'namaBarang' => 'Laptop', 'lokasiAsal' => 'Lab 1', 'kodeTransaksi' => 'PJM-seed-2',
+                'peminjam' => 'Siti', 'kontakPeminjam' => '0813', 'keperluan' => 'Seminar', 'tanggalPinjam' => '02/09/2026 08:00',
+                'tanggalRencanaKembali' => '2026-09-03', 'tanggalKembaliAktual' => '03/09/2026 15:00', 'kondisiSaatKembali' => 'Baik', 'status' => 'Dikembalikan', 'dicatatOleh' => 'Administrator'],
+            ['id' => 3, 'idBarang' => 1, 'kodeUnit' => 'ELE-83719-3', 'unitIndex' => 3, 'namaBarang' => 'Laptop', 'lokasiAsal' => 'Lab 1', 'kodeTransaksi' => 'PJM-seed-2',
+                'peminjam' => 'Siti', 'kontakPeminjam' => '0813', 'keperluan' => 'Seminar', 'tanggalPinjam' => '02/09/2026 08:00',
+                'tanggalRencanaKembali' => '2026-09-03', 'tanggalKembaliAktual' => '03/09/2026 15:00', 'kondisiSaatKembali' => 'Rusak Ringan', 'status' => 'Dikembalikan', 'dicatatOleh' => 'Administrator'],
+            ['id' => 4, 'idBarang' => 99, 'kodeUnit' => 'GAIB-1', 'unitIndex' => 1, 'namaBarang' => 'Gaib', 'lokasiAsal' => 'Lab 1', 'kodeTransaksi' => 'PJM-seed-3',
+                'peminjam' => 'X', 'kontakPeminjam' => '', 'keperluan' => 'x', 'tanggalPinjam' => '03 Sep 2026, 09.00', 'tanggalRencanaKembali' => '2026-09-04',
+                'tanggalKembaliAktual' => '', 'kondisiSaatKembali' => '', 'status' => 'Dipinjam', 'dicatatOleh' => ''],
+            ['id' => 5, 'idBarang' => 2, 'kodeUnit' => '49281-1', 'unitIndex' => 1, 'namaBarang' => 'Kamera', 'lokasiAsal' => 'Lab 1', 'kodeTransaksi' => 'PJM-seed-4',
+                'peminjam' => 'Dewi', 'kontakPeminjam' => '', 'keperluan' => 'Liputan', 'tanggalPinjam' => '01 Sep 2026, 09.00', 'tanggalRencanaKembali' => '2026-08-30',
+                'tanggalKembaliAktual' => '', 'kondisiSaatKembali' => '', 'status' => 'Dipinjam', 'dicatatOleh' => 'Petugas Lab 1'],
+        ];
+        $d['laporan'] = [
+            ['id' => 1, 'waktu' => '6 Jan 2026, 20.30', 'user' => 'Administrator', 'aksi' => 'Login', 'detail' => 'User berhasil login'],
+            ['id' => 2, 'waktu' => '07/01/2026 08:15', 'user' => 'Petugas Lab 1', 'aksi' => 'Tambah Barang', 'detail' => 'Laptop ASUS ROG'],
         ];
 
         return $d;

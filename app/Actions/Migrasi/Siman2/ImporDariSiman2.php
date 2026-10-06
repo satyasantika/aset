@@ -30,6 +30,9 @@ class ImporDariSiman2
             new ImporRuangan,
             $this->pengguna,
             new ImporInventaris,
+            new ImporMutasi,
+            new ImporPeminjaman,
+            new ImporLaporan,
         ];
     }
 

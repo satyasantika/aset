@@ -245,6 +245,7 @@ it('label bentrok dengan aset lain tidak ditimpa dan dilaporkan sebagai peringat
         [...$d['inventaris'][1], 'id' => 21, 'kodeBarang' => 'AAA', 'nup' => '5', 'kodeBmn' => ''],
         [...$d['inventaris'][1], 'id' => 22, 'kodeBarang' => 'BBB', 'nup' => '5', 'kodeBmn' => ''], // NUP "5" sama → teks label "5" bentrok
     ];
+    $d['mutasi'] = [];
 
     $pemetaan = Siman2Fixture::pemetaan(['admin' => 'admin@unsil.ac.id', 'petugas1' => 'petugas1@unsil.ac.id', 'pimpinan' => 'pimpinan@unsil.ac.id']);
     test()->artisan('siman2:impor', ['berkas' => Siman2Fixture::buat($d), '--pemetaan' => $pemetaan])
