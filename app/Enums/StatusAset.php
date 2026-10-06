@@ -32,7 +32,7 @@ enum StatusAset: string
             self::Aktif => [self::DalamPerbaikan, self::Hilang, self::DiusulkanHapus],
             self::DalamPerbaikan => [self::Aktif],
             self::Hilang => [self::Aktif, self::DiusulkanHapus],
-            self::DiusulkanHapus => [self::Dihapus, self::Aktif],
+            self::DiusulkanHapus => [self::Dihapus, self::Aktif, self::Hilang],
             self::Dihapus => [],
         };
     }
