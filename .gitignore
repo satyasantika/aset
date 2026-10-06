@@ -1,0 +1,37 @@
+# Laravel
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/public/css
+/public/js
+/storage/*.key
+/storage/pail
+/storage/app/tmp/*
+!/storage/app/tmp/.gitkeep
+.phpunit.result.cache
+/.phpunit.cache
+.phpactor.json
+auth.json
+/auth.json
+Homestead.json
+Homestead.yaml
+*.log
+
+# Rahasia & data
+.env
+.env.*
+!.env.example
+.env.backup
+.env.production
+*.sql
+*.sql.gz
+*.zip
+/*.xlsx
+
+# Editor/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
