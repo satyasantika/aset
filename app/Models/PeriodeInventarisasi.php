@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Support\Carbon;
 
 /**
  * Periode sensus/opname (RG-04, BR-14). Hanya satu periode `berjalan` pada satu waktu.
@@ -18,6 +20,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property StatusPeriodeInventarisasi $status
  * @property JenisInventarisasi $jenis
  * @property array<string, mixed>|null $berita_acara
+ * @property Carbon $mulai
+ * @property Carbon|null $selesai_rencana
+ * @property Carbon|null $dibuka_pada
+ * @property Carbon|null $ditutup_pada
+ * @property Carbon|null $disahkan_pada
  */
 class PeriodeInventarisasi extends Model
 {
@@ -57,6 +64,12 @@ class PeriodeInventarisasi extends Model
     public function ruangan(): HasMany
     {
         return $this->hasMany(InventarisasiRuangan::class, 'periode_id');
+    }
+
+    /** @return HasManyThrough<HasilInventarisasi, InventarisasiRuangan, $this> */
+    public function hasil(): HasManyThrough
+    {
+        return $this->hasManyThrough(HasilInventarisasi::class, InventarisasiRuangan::class, 'periode_id', 'inventarisasi_ruangan_id');
     }
 
     /** @return BelongsTo<User, $this> */

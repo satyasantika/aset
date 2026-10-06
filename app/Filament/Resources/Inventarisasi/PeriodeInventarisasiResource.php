@@ -8,6 +8,7 @@ use App\Filament\Resources\Inventarisasi\Pages\BuatPeriodeInventarisasi;
 use App\Filament\Resources\Inventarisasi\Pages\DaftarPeriodeInventarisasi;
 use App\Filament\Resources\Inventarisasi\Pages\LihatPeriodeInventarisasi;
 use App\Filament\Resources\Inventarisasi\RelationManagers\RuanganInventarisasiRelationManager;
+use App\Filament\Resources\Inventarisasi\RelationManagers\TidakDitemukanRelationManager;
 use App\Models\PeriodeInventarisasi;
 use App\Models\Ruangan;
 use App\Models\User;
@@ -115,7 +116,7 @@ class PeriodeInventarisasiResource extends Resource
 
     public static function getRelations(): array
     {
-        return [RuanganInventarisasiRelationManager::class];
+        return [RuanganInventarisasiRelationManager::class, TidakDitemukanRelationManager::class];
     }
 
     public static function getPages(): array

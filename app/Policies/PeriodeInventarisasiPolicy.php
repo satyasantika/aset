@@ -53,6 +53,19 @@ class PeriodeInventarisasiPolicy
         return $pelaku->can('inventarisasi.sahkan') && $periode->status === StatusPeriodeInventarisasi::Ditutup;
     }
 
+    /** Verifikasi barang tidak ditemukan → hilang. */
+    public function verifikasi(User $pelaku, PeriodeInventarisasi $periode): bool
+    {
+        return $pelaku->can('inventarisasi.kelola');
+    }
+
+    /** Berita acara (PDF/Excel) hanya untuk periode yang sudah ditutup; PIC hanya periode yang melibatkan ruangannya. */
+    public function lihatBeritaAcara(User $pelaku, PeriodeInventarisasi $periode): bool
+    {
+        return in_array($periode->status, [StatusPeriodeInventarisasi::Ditutup, StatusPeriodeInventarisasi::Disahkan], true)
+            && ($pelaku->hasAnyRole(['pimpinan']) ? $pelaku->can('laporan.lihat') : $this->view($pelaku, $periode));
+    }
+
     public function tugaskan(User $pelaku, InventarisasiRuangan $inventarisasi): bool
     {
         return $pelaku->can('inventarisasi.kelola');
@@ -61,6 +74,8 @@ class PeriodeInventarisasiPolicy
     /** Memindai/mencatat hasil pada satu ruangan-periode (periode harus berjalan). */
     public function pindai(User $pelaku, InventarisasiRuangan $inventarisasi): bool
     {
+        $inventarisasi->loadMissing('periode');
+
         if (! $pelaku->can('inventarisasi.pindai') || $inventarisasi->periode->status !== StatusPeriodeInventarisasi::Berjalan) {
             return false;
         }
