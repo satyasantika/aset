@@ -6,6 +6,16 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.3.0] - 2026-10-08
+
+Fase 3: master data.
+
+### Ditambahkan
+- Master gedung, kategori ruangan (flag DKPS), prodi, ruangan (K3L, prodi pemakai, dapat dipinjam) dengan penugasan PIC (satu PIC utama) dan scope `Ruangan::dikelolaOleh`.
+- Kodefikasi barang BMN dengan impor CSV (antrean `impor`) dan rule `KodeBarangValid`; seeder contoh bertanda CONTOH.
+- Pengaturan sistem (identitas, penandatangan, toggle fitur BR-22, ambang & retensi) dengan cache dan halaman super-admin.
+- Fondasi tautan berkas (STANDAR-TEKNIS §1a): `tautan_berkas`, `TautanBerkasValid`, `PenyimpananBerkas`/`TautanEksternal`, job `PeriksaTautanBerkas` anti-SSRF, komponen `x-tautan-berkas`; uji arsitektur tanpa FileUpload.
+
 ## [0.2.0] - 2026-10-07
 
 Fase 2: autentikasi dan peran.
