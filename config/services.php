@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Gateway WhatsApp opsional (pengingat terlambat/pengambilan). Nonaktif secara bawaan.
+    'whatsapp' => [
+        'enabled' => (bool) env('WHATSAPP_ENABLED', false),
+        'url' => env('WHATSAPP_URL'),
+        'token' => env('WHATSAPP_TOKEN'),
+    ],
+
 ];
