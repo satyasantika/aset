@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DbrPdfController;
 use App\Http\Controllers\LabelPdfController;
 use App\Http\Controllers\Publik\LaporKerusakanController;
 use App\Http\Controllers\Publik\LookupAsetController;
@@ -33,4 +34,5 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::get('/pinjaman-saya', PinjamanSaya::class)->name('pinjaman-saya');
 
     Route::match(['get', 'post'], '/cetak/label', LabelPdfController::class)->name('cetak.label');
+    Route::get('/cetak/dbr/{dbr}', DbrPdfController::class)->whereUuid('dbr')->name('cetak.dbr');
 });
