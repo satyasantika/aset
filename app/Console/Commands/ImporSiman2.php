@@ -15,7 +15,7 @@ class ImporSiman2 extends Command
         {--nup-berurutan : Konfirmasi NUP lama berurutan (NUP awal + i) untuk baris berjumlah > 1}
         {--pemetaan=docs/migrasi/pemetaan-pengguna.csv : CSV pemetaan username,email}';
 
-    protected $description = 'Impor data SIMAN-FKIP-2 (Google Sheets, XLSX) ke SIMAN FKIP 3 (idempoten; lihat docs/07-MIGRASI-DATA.md)';
+    protected $description = 'Impor data SIMAN-FKIP-2 (Google Sheets, XLSX) ke ASET FKIP 3 (idempoten; lihat docs/07-MIGRASI-DATA.md)';
 
     public function handle(ImporDariSiman2 $impor): int
     {

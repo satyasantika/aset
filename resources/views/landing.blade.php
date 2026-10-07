@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SIMAN FKIP — Sistem Informasi Manajemen Aset</title>
+    <title>ASET FKIP — Sistem Informasi Manajemen Aset</title>
     <style>
         body{font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:#f8fafc;color:#0f172a}
         header{background:#0f172a;color:#fff;padding:48px 20px 40px;text-align:center}
@@ -21,7 +21,7 @@
 </head>
 <body>
 <header>
-    <h1>SIMAN FKIP</h1>
+    <h1>ASET FKIP</h1>
     <p>Sistem Informasi Manajemen Aset dan Barang Milik Negara Fakultas Keguruan dan Ilmu Pendidikan Universitas Siliwangi —
         pencatatan barang per kode + NUP, label QR, peminjaman, pemeliharaan, inventarisasi, dan laporan.</p>
     <a class="masuk" href="{{ url('admin/login') }}">Masuk</a>
@@ -45,6 +45,6 @@
         (surel <code>@unsil.ac.id</code>); admin dan super-admin wajib memakai autentikasi dua langkah.
     </div>
 </main>
-<footer>SIMAN FKIP v{{ config('app.version') }} · Universitas Siliwangi</footer>
+<footer>ASET FKIP v{{ config('app.version') }} · Universitas Siliwangi</footer>
 </body>
 </html>

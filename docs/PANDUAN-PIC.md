@@ -1,4 +1,4 @@
-# Panduan PIC Ruangan — SIMAN FKIP
+# Panduan PIC Ruangan — ASET FKIP
 
 Untuk penanggung jawab ruangan (peran **pic-ruangan**). Anda mengelola barang di **ruangan yang ditugaskan** kepada Anda;
 barang di ruangan lain hanya dapat dilihat. Panel: `https://<domain>/admin`. Halaman cepat (ponsel): `/pindai`, `/keranjang`.

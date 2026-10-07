@@ -1,4 +1,4 @@
-# 02 — Arsitektur: SIMAN FKIP 3
+# 02 — Arsitektur: ASET FKIP 3
 
 Turunan `STANDAR-TEKNIS.md`. Penyimpangan dinyatakan eksplisit.
 
@@ -12,7 +12,7 @@ flowchart LR
         C[Civitas]
         U[Publik - pindai QR]
     end
-    subgraph App["SIMAN FKIP 3 (Laravel 13)"]
+    subgraph App["ASET FKIP 3 (Laravel 13)"]
         F[Panel Filament /admin]
         L[Halaman Livewire /pinjam, /pindai, /inventarisasi]
         Q[Rute publik /a/{id}, /lapor-kerusakan]

@@ -1,4 +1,4 @@
-# SIMAN FKIP — produksi. Tanpa MySQL: basis data SQLite (mode WAL) pada volume `data`, dicadangkan harian.
+# ASET FKIP — produksi. Tanpa MySQL: basis data SQLite (mode WAL) pada volume `data`, dicadangkan harian.
 # Jalankan: docker compose -f compose.prod.yaml --env-file .env.production up -d --build
 name: siman
 

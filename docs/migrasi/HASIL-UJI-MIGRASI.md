@@ -1,4 +1,4 @@
-# Hasil Uji Migrasi Data SIMAN-FKIP-2 → SIMAN FKIP 3
+# Hasil Uji Migrasi Data SIMAN-FKIP-2 → ASET FKIP 3
 
 > **Status: BELUM DIJALANKAN dengan data nyata.** Perintah `siman2:impor` / `siman2:verifikasi` sudah diuji otomatis dengan fixture XLSX
 > kecil (lihat `tests/Feature/ImporSiman2*`), tetapi uji dengan ekspor spreadsheet SIMAN-2 yang sebenarnya adalah **langkah manusia** (F7.4)

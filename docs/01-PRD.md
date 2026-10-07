@@ -1,4 +1,4 @@
-# 01 — PRD: SIMAN FKIP 3 (Sistem Aset/BMN dan Peminjaman)
+# 01 — PRD: ASET FKIP 3 (Sistem Aset/BMN dan Peminjaman)
 
 > Pembangunan ulang SIMAN-FKIP-2 (Vue + Google Apps Script + Google Sheets) menjadi Laravel 13 + MySQL 8.4 + Redis 7.
 > Baca dulu `00-ANALISIS-SISTEM-BERJALAN.md` (apa yang dipertahankan & diperbaiki) dan `06-REKOMENDASI-REGULASI.md` (tambahan berdasarkan aturan). Butir **(perlu verifikasi)** wajib dipastikan sebelum fase terkait.

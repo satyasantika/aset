@@ -1,4 +1,4 @@
-# SIMAN FKIP — image produksi (php-fpm). Dipakai untuk peran app, queue (Horizon), dan scheduler.
+# ASET FKIP — image produksi (php-fpm). Dipakai untuk peran app, queue (Horizon), dan scheduler.
 # Tahap 1: aset front-end (Vite). Tahap 2: dependensi Composer tanpa dev. Tahap 3: runtime.
 
 FROM node:22-alpine AS aset

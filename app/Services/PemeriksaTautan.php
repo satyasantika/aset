@@ -67,7 +67,7 @@ class PemeriksaTautan
     {
         $klien = Http::timeout((int) config('berkas.pemeriksaan.timeout_detik'))
             ->withOptions(['allow_redirects' => false, 'stream' => true])
-            ->withHeaders(['User-Agent' => 'SIMAN-FKIP-PemeriksaTautan/1.0']);
+            ->withHeaders(['User-Agent' => 'ASET-FKIP-PemeriksaTautan/1.0']);
 
         $respons = $klien->head($url);
 
