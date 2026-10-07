@@ -1,4 +1,4 @@
-# 05 — Uji Penerimaan: SIMAN FKIP 3
+# 05 — Uji Penerimaan: ASET FKIP 3
 
 ## 1. Persiapan
 

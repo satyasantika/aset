@@ -1,7 +1,7 @@
 <?php
 
 it('menampilkan landing page dengan tautan ke panduan peran publik', function () {
-    $res = $this->get('/')->assertOk()->assertSee('SIMAN FKIP')->assertSee('Panduan pengguna per peran');
+    $res = $this->get('/')->assertOk()->assertSee('ASET FKIP')->assertSee('Panduan pengguna per peran');
 
     foreach (['umum', 'civitas', 'pic', 'admin', 'pejabat', 'pimpinan'] as $peran) {
         $res->assertSee("panduan/{$peran}.html", false);

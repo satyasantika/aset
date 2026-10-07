@@ -1,4 +1,4 @@
-# Panduan deploy produksi SIMAN FKIP
+# Panduan deploy produksi ASET FKIP
 
 Pola: satu host Docker (Linux) menjalankan `compose.prod.yaml` dengan enam layanan — `app` (php-fpm), `web` (nginx),
 `queue` (Horizon), `scheduler`, `redis`, `cadangan`. **Basis data SQLite (mode WAL) pada volume `data`; tidak ada

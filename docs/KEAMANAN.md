@@ -1,4 +1,4 @@
-# Keamanan SIMAN FKIP
+# Keamanan ASET FKIP
 
 Ringkasan kontrol (checklist 05-UJI §3) dan hasil pemeriksaan F12.1.
 

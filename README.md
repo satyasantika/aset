@@ -1,4 +1,4 @@
-# SIMAN FKIP — Sistem Informasi Manajemen Aset
+# ASET FKIP — Sistem Informasi Manajemen Aset
 
 Sistem pengelolaan aset/Barang Milik Negara (BMN) Fakultas Keguruan dan Ilmu Pendidikan,
 Universitas Siliwangi. Mencatat setiap barang per kode barang + NUP (bukan per baris agregat),

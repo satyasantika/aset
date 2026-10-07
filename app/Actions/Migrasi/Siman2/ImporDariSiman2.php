@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Password;
 use Spatie\Activitylog\ActivityLogStatus;
 
 /**
- * Orkestrasi impor SIMAN-2 (XLSX) → SIMAN FKIP 3. Urutan: pengaturan → kategori ruangan → ruangan → pengguna & PIC →
+ * Orkestrasi impor SIMAN-2 (XLSX) → ASET FKIP 3. Urutan: pengaturan → kategori ruangan → ruangan → pengguna & PIC →
  * (F7.2) inventaris → (F7.3) mutasi → peminjaman → log. Real: transaksi per langkah. Dry-run: seluruhnya dijalankan di
  * dalam satu transaksi yang SELALU di-rollback sehingga tidak ada data yang tertulis, tetapi galat basis data ikut
  * terdeteksi. Jejak audit dimatikan selama impor (riwayat lama diimpor eksplisit).

@@ -1,4 +1,4 @@
-# Panduan Admin BMN — SIMAN FKIP
+# Panduan Admin BMN — ASET FKIP
 
 Untuk **admin-bmn** (dan **super-admin** untuk pengaturan sistem). Akun admin wajib **MFA** (aplikasi autentikator) —
 diminta pada login pertama. Pejabat penatausahaan mengesahkan dokumen; Anda menyusun dan memverifikasi.

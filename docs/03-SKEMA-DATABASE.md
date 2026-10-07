@@ -1,4 +1,4 @@
-# 03 — Skema Database: SIMAN FKIP 3
+# 03 — Skema Database: ASET FKIP 3
 
 MySQL 8.4, `utf8mb4_0900_ai_ci`, InnoDB. Semua tabel domain memiliki `id`, `created_at`, `updated_at`; semua primary key `id` **UUIDv7** CHAR(36) (`HasUuids`, STANDAR-TEKNIS §4a); FK `foreignUuid`, polimorfik `uuidMorphs`; URL, QR, dan API memakai `id` yang sama (tanpa kolom `ulid`).
 

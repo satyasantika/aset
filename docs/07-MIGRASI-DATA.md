@@ -1,4 +1,4 @@
-# 07 — Migrasi Data: SIMAN-FKIP-2 (Google Sheets) → SIMAN FKIP 3 (MySQL)
+# 07 — Migrasi Data: SIMAN-FKIP-2 (Google Sheets) → ASET FKIP 3 (MySQL)
 
 ## 1. Prinsip
 

@@ -92,14 +92,14 @@ def nav(aktif):
 
 def page(role):
     nama, sub, desc = ROLES[role]
-    h = [f'<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan {html.escape(nama)} — SIMAN FKIP</title><link rel="stylesheet" href="panduan.css"></head><body>',
+    h = [f'<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan {html.escape(nama)} — ASET FKIP</title><link rel="stylesheet" href="panduan.css"></head><body>',
          f'<header><h1>Panduan: {html.escape(nama)}</h1><p class="lead" style="color:#cbd5e1">{html.escape(desc)}</p>{nav(role)}</header><main>']
     for judul, teks, gambar in G[role]:
         h.append(f'<h2>{html.escape(judul)}</h2>')
         h.append('<ul>' + ''.join(f'<li>{md(t)}</li>' for t in teks) + '</ul>' if len(teks) > 1 else f'<p>{md(teks[0])}</p>')
         for g, ket in gambar:
             h.append(f'<figure><img src="img/{g}.jpg" alt="{html.escape(ket)}" loading="lazy"><figcaption>{html.escape(ket)}</figcaption></figure>')
-    h.append('</main><footer>SIMAN FKIP — Sistem Informasi Manajemen Aset FKIP UNSIL. Tangkapan layar memakai data contoh (UAT).</footer></body></html>')
+    h.append('</main><footer>ASET FKIP — Sistem Informasi Manajemen Aset FKIP UNSIL. Tangkapan layar memakai data contoh (UAT).</footer></body></html>')
     return '\n'.join(h)
 
 os.makedirs(OUT, exist_ok=True)

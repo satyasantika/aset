@@ -1,4 +1,4 @@
-# 04 — Prompt Bertahap Vibecoding: SIMAN FKIP 3
+# 04 — Prompt Bertahap Vibecoding: ASET FKIP 3
 
 > Kerjakan berurutan; satu langkah = satu sesi agen = satu commit yang lolos uji. Rujukan: `00-ANALISIS`, `01-PRD` (BR-xx), `02-ARSITEKTUR`, `03-SKEMA-DATABASE`, `06-REKOMENDASI-REGULASI` (RG-xx), `07-MIGRASI-DATA`, standar bersama. Di repo, semua dokumen disalin ke `docs/`.
 > Perintah memakai Laravel Sail (`sail` = `./vendor/bin/sail`); bila memakai Herd, hilangkan awalan `sail`.
@@ -43,7 +43,7 @@ aktifkan core.hooksPath dulu). 3) Salin dokumen paket ke docs/ (01–07, STANDAR
 **Commit:**
 ```bash
 git add -A
-git commit -m "chore: inisialisasi repositori siman fkip"
+git commit -m "chore: inisialisasi repositori aset fkip"
 ```
 
 ### F0.2 — Templat PR & CHANGELOG
@@ -961,8 +961,8 @@ Langkah manusia: jalankan 07-MIGRASI §7 (bekukan SIMAN-2, impor final, verifika
 
 ```bash
 git add -A
-git commit -m "docs(changelog): catat rilis 1.0.0 siman fkip"
+git commit -m "docs(changelog): catat rilis 1.0.0 aset fkip"
 git push -u origin feat/f12-rilis   # PR → CI hijau → merge
 git switch main && git pull
-git tag -a v1.0.0 -m "SIMAN FKIP 1.0.0" && git push origin --tags
+git tag -a v1.0.0 -m "ASET FKIP 1.0.0" && git push origin --tags
 ```
