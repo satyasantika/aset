@@ -12,7 +12,6 @@ use App\Models\TiketPemeliharaan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Statistik dasbor (LAP-02, US-LAP-01). Cakupan: PIC hanya ruangannya (BR-05); admin, pejabat, dan pimpinan seluruh
@@ -72,9 +71,12 @@ class Dasbor
                 'B' => (int) $r->b, 'RR' => (int) $r->rr, 'RB' => (int) $r->rb,
             ])->all();
 
+        // Group by alias 'kategori' (bukan mengulang ekspresi coalesce() di GROUP BY): MySQL dengan
+        // ONLY_FULL_GROUP_BY aktif bisa menolak ekspresi raw yang identik di SELECT dan GROUP BY sebagai
+        // dua string terpisah (1055 "isn't in GROUP BY"); grouping by alias terbukti portabel di semua mode.
         $perKategori = $ada()->leftJoin('kodefikasi_barang', 'kodefikasi_barang.kode', '=', 'aset.kode_barang')
             ->selectRaw("coalesce(nullif(kodefikasi_barang.kategori_lokal, ''), kodefikasi_barang.uraian, 'Tanpa kategori') as kategori, count(*) as jumlah, coalesce(sum(aset.nilai_perolehan), 0) as nilai")
-            ->groupBy(DB::raw("coalesce(nullif(kodefikasi_barang.kategori_lokal, ''), kodefikasi_barang.uraian, 'Tanpa kategori')"))
+            ->groupBy('kategori')
             ->orderByDesc('jumlah')->toBase()->get()
             ->map(fn ($r): array => ['kategori' => $r->kategori, 'jumlah' => (int) $r->jumlah, 'nilai' => number_format((float) $r->nilai, 2, '.', '')])->all();
 
