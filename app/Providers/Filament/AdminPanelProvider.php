@@ -44,6 +44,16 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::FOOTER,
                 fn (): HtmlString => new HtmlString('<div class="py-2 text-center text-xs text-gray-500">'.e(config('app.name')).' v'.e(config('app.version')).'</div>'),
             )
+            ->brandName('ASET FKIP')
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.auth.gaya'))
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
+                fn (): HtmlString => new HtmlString('<div class="aset-auth-lencana"><span>FKIP Universitas Siliwangi</span></div>'),
+            )
+            ->renderHook(
+                PanelsRenderHook::SIMPLE_LAYOUT_END,
+                fn (): HtmlString => new HtmlString('<p class="aset-auth-kembali"><a href="'.e(url('/')).'">&larr; Kembali ke beranda</a></p>'),
+            )
             ->colors([
                 'primary' => Color::Blue,
             ])
