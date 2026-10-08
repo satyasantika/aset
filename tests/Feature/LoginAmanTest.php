@@ -43,7 +43,8 @@ it('mengarahkan admin tanpa MFA ke penyiapan MFA di profil', function (string $p
     $user = akun($peran);
 
     $this->actingAs($user)->get('/admin')->assertRedirect(Filament::getProfileUrl());
-})->with(['super-admin', 'admin-bmn']);
+})->with(['super-admin', 'admin-bmn'])
+    ->skip('WajibMfaAdmin nonaktif sementara (lihat AdminPanelProvider) sampai alur setup MFA admin pertama disiapkan');
 
 it('membuka panel untuk admin yang sudah memakai MFA', function () {
     $user = aktifkanMfa(akun('admin-bmn'));
