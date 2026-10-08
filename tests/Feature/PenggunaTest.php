@@ -6,9 +6,12 @@ use App\Filament\Resources\Pengguna\Pages\ListPengguna;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PeranDanIzinSeeder;
+use Filament\Actions\ImportAction;
+use Filament\Actions\Testing\TestAction;
 use Filament\Auth\Notifications\ResetPassword as ResetPasswordFilament;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -123,4 +126,80 @@ it('tidak pernah mengizinkan penghapusan akun', function () {
     $target = User::factory()->create();
 
     expect(akunBerperan('admin-bmn')->can('delete', $target))->toBeFalse();
+});
+
+// ── Impor massal pengguna ──────────────────────────────────────────────────────
+
+it('super-admin mengimpor pengguna lewat CSV: baris valid dibuat dengan peran dan surel atur kata sandi, baris invalid gagal', function () {
+    Notification::fake();
+    $this->actingAs(akunBerperan('super-admin'));
+    $ada = User::factory()->create(['email' => 'ada@unsil.ac.id']);
+    $csv = "name,email,nip,no_hp,roles,aktif\n"
+        ."Budi Santoso,budi@unsil.ac.id,198001,0811,pic-ruangan,1\n"
+        ."Tanpa Domain,luar@gmail.com,,,,1\n"
+        .'Surel Ganda,'.$ada->email.",,,,1\n";
+
+    Livewire::test(ListPengguna::class)
+        ->callAction(ImportAction::class, [
+            'file' => UploadedFile::fake()->createWithContent('pengguna.csv', $csv),
+            'columnMap' => ['name' => 'name', 'email' => 'email', 'nip' => 'nip', 'no_hp' => 'no_hp', 'roles' => 'roles', 'aktif' => 'aktif'],
+        ])
+        ->assertHasNoFormErrors();
+
+    $baru = User::query()->where('email', 'budi@unsil.ac.id')->firstOrFail();
+    expect($baru->hasRole('pic-ruangan'))->toBeTrue()
+        ->and($baru->aktif)->toBeTrue()
+        ->and($baru->nip)->toBe('198001')
+        ->and(User::query()->where('email', 'luar@gmail.com')->exists())->toBeFalse()
+        ->and(User::query()->where('name', 'Surel Ganda')->exists())->toBeFalse();
+    Notification::assertSentTo($baru, ResetPasswordFilament::class);
+});
+
+it('admin-bmn tidak dapat memberi peran istimewa lewat impor massal', function () {
+    $this->actingAs(akunBerperan('admin-bmn'));
+    $csv = "name,email,roles\nLicik,licik@unsil.ac.id,super-admin\n";
+
+    Livewire::test(ListPengguna::class)
+        ->callAction(ImportAction::class, [
+            'file' => UploadedFile::fake()->createWithContent('pengguna.csv', $csv),
+            'columnMap' => ['name' => 'name', 'email' => 'email', 'roles' => 'roles'],
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(User::query()->where('email', 'licik@unsil.ac.id')->exists())->toBeFalse();
+});
+
+// ── Impersonate (peniruan pengguna) ─────────────────────────────────────────────
+
+it('hanya super-admin melihat aksi impersonate di daftar pengguna', function (string $peran, bool $terlihat) {
+    $this->actingAs(akunBerperan($peran));
+    $target = User::factory()->create(['aktif' => true]);
+    $target->assignRole('pic-ruangan');
+
+    $tes = Livewire::test(ListPengguna::class);
+    $terlihat
+        ? $tes->assertActionVisible(TestAction::make('impersonate')->table($target))
+        : $tes->assertActionHidden(TestAction::make('impersonate')->table($target));
+})->with([['super-admin', true], ['admin-bmn', false]]);
+
+it('super-admin dapat meniru pengguna lain, tetapi tidak dapat meniru super-admin lain', function () {
+    $pelaku = akunBerperan('super-admin');
+    $target = User::factory()->create(['aktif' => true]);
+    $target->assignRole('pic-ruangan');
+    $superLain = akunBerperan('super-admin');
+
+    $this->actingAs($pelaku);
+
+    Livewire::test(ListPengguna::class)
+        ->assertActionVisible(TestAction::make('impersonate')->table($target))
+        ->assertActionHidden(TestAction::make('impersonate')->table($superLain));
+});
+
+it('akun nonaktif tidak dapat ditiru', function () {
+    $this->actingAs(akunBerperan('super-admin'));
+    $target = User::factory()->create(['aktif' => false]);
+    $target->assignRole('pic-ruangan');
+
+    Livewire::test(ListPengguna::class)
+        ->assertActionHidden(TestAction::make('impersonate')->table($target));
 });
