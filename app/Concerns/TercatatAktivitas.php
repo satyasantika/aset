@@ -29,7 +29,7 @@ trait TercatatAktivitas
     {
         return LogOptions::defaults()
             ->logAll()
-            ->logExcept(static::atributRahasia())
+            ->logExcept([...static::atributRahasia(), 'updated_at'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName(static::namaModulAudit());
