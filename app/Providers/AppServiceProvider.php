@@ -35,10 +35,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use STS\FilamentImpersonate\Events\EnterImpersonation;
+use STS\FilamentImpersonate\Events\LeaveImpersonation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -87,5 +90,26 @@ class AppServiceProvider extends ServiceProvider
 
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        // Audit kelembagaan (BR-21): setiap mulai/akhir peniruan pengguna tercatat.
+        Event::listen(EnterImpersonation::class, function (EnterImpersonation $event): void {
+            $pelaku = $event->impersonator instanceof Model ? $event->impersonator : null;
+            $target = $event->impersonated instanceof Model ? $event->impersonated : null;
+
+            activity('pengguna')
+                ->causedBy($pelaku)
+                ->performedOn($target)
+                ->withProperties(['impersonator_id' => $event->impersonator->getAuthIdentifier(), 'impersonated_id' => $event->impersonated->getAuthIdentifier()])
+                ->log('mulai meniru pengguna');
+        });
+
+        Event::listen(LeaveImpersonation::class, function (LeaveImpersonation $event): void {
+            $pelaku = $event->impersonator instanceof Model ? $event->impersonator : null;
+
+            activity('pengguna')
+                ->causedBy($pelaku)
+                ->withProperties(['impersonator_id' => $event->impersonator->getAuthIdentifier(), 'impersonated_id' => $event->impersonated?->getAuthIdentifier()])
+                ->log('mengakhiri peniruan pengguna');
+        });
     }
 }

@@ -112,4 +112,16 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $ruanganId !== null
             && $this->ruanganDikelola()->whereKey($ruanganId)->exists();
     }
+
+    /** Hanya super-admin dapat meniru (impersonate) pengguna lain. */
+    public function canImpersonate(): bool
+    {
+        return $this->aktif && $this->hasRole('super-admin');
+    }
+
+    /** Akun super-admin tidak boleh ditiru siapa pun, termasuk super-admin lain. */
+    public function canBeImpersonated(): bool
+    {
+        return $this->aktif && ! $this->hasRole('super-admin');
+    }
 }
