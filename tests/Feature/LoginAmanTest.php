@@ -123,6 +123,31 @@ it('mengeluarkan perangkat lain saat kata sandi diganti', function () {
     Event::assertDispatched(OtherDeviceLogout::class);
 });
 
+it('pengguna dengan wajib_ganti_sandi diarahkan ke profil', function () {
+    $user = akun('pic-ruangan', ['wajib_ganti_sandi' => true]);
+
+    $this->actingAs($user)->get('/admin')->assertRedirect(Filament::getProfileUrl());
+});
+
+it('mengganti sandi di profil mencabut kewajiban ganti sandi', function () {
+    $user = akun('pic-ruangan', ['wajib_ganti_sandi' => true]);
+    $this->actingAs($user);
+
+    Livewire::test(EditProfil::class)
+        ->fillForm([
+            'name' => $user->name,
+            'email' => $user->email,
+            'password' => 'sandi-baru-123',
+            'passwordConfirmation' => 'sandi-baru-123',
+            'currentPassword' => 'rahasia-123',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->fresh()->wajib_ganti_sandi)->toBeFalse();
+    $this->get('/admin')->assertOk();
+});
+
 it('civitas dapat masuk dan dialihkan ke /pinjam, tetapi tetap tidak dapat membuka panel', function () {
     $user = akun('civitas');
 

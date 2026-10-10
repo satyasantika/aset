@@ -38,6 +38,9 @@ class PenggunaForm
                     }
                 }]),
             Toggle::make('aktif')->label('Aktif')->default(true),
+            Toggle::make('wajib_ganti_sandi')->label('Wajib ganti sandi saat masuk')
+                ->helperText('Nyalakan untuk akun dengan kata sandi awal yang dibuat admin.')
+                ->default(true),
         ]);
     }
 
