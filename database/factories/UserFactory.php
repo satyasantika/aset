@@ -30,6 +30,7 @@ class UserFactory extends Factory
             'nip' => null,
             'no_hp' => null,
             'aktif' => true,
+            'wajib_ganti_sandi' => false,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

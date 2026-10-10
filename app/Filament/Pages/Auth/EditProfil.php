@@ -18,6 +18,10 @@ class EditProfil extends EditProfile
         // Pada $data kata sandi sudah di-hash oleh form; teks asli ada di state form.
         $kataSandiBaru = $this->data['password'] ?? null;
 
+        if (filled($kataSandiBaru)) {
+            $data['wajib_ganti_sandi'] = false;
+        }
+
         $record = parent::handleRecordUpdate($record, $data);
 
         if (filled($kataSandiBaru)) {

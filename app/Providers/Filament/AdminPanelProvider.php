@@ -7,6 +7,7 @@ use App\Filament\Pages\Auth\Masuk;
 use App\Filament\Widgets\PeringatanInventarisasiWidget;
 use App\Filament\Widgets\RincianAsetWidget;
 use App\Filament\Widgets\StatistikAsetWidget;
+use App\Http\Middleware\PaksaGantiSandi;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -83,6 +84,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                PaksaGantiSandi::class,
                 // App\Http\Middleware\WajibMfaAdmin::class, // nonaktif sementara: belum ada admin yang setup MFA app authentication
             ]);
     }
