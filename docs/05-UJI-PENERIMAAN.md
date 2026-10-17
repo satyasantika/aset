@@ -2,7 +2,7 @@
 
 ## 1. Persiapan
 
-Staging = konfigurasi produksi; Horizon & scheduler berjalan; data hasil migrasi SIMAN-2 (F7) atau `siman:siapkan-uat`. Akun uji: `super-admin`, `admin-bmn`, `pejabat-penatausahaan`, dua `pic-ruangan` (Lab Komputer, Aula), `pimpinan`, `civitas` (dosen & pengurus ormawa). Siapkan 10 label lama tercetak (berbagai format) dan 2 label dari daftar "perlu cetak ulang".
+Staging = konfigurasi produksi; scheduler (sekaligus worker antrean, §1b) berjalan dan `/api/health` sehat; data hasil migrasi SIMAN-2 (F7) atau `siman:siapkan-uat`. Akun uji: `super-admin`, `admin-bmn`, `pejabat-penatausahaan`, dua `pic-ruangan` (Lab Komputer, Aula), `pimpinan`, `civitas` (dosen & pengurus ormawa). Siapkan 10 label lama tercetak (berbagai format) dan 2 label dari daftar "perlu cetak ulang".
 
 ## 2. Skenario UAT
 
@@ -27,7 +27,7 @@ Staging = konfigurasi produksi; Horizon & scheduler berjalan; data hasil migrasi
 | P-01 | Pindai label **lama** `KAT-KODE-n` dan label baru (UUID) | Keduanya membuka aset yang benar | |
 | P-02 | Ubah kondisi barang di ruangannya; coba di ruangan lain | Berhasil + riwayat; ruangan lain 403 | |
 | P-03 | Keranjang: pinjamkan 3 barang; salah satu sedang dipinjam | Seluruh keranjang ditolak dengan nama barang bermasalah | |
-| P-04 | Dua PIC meminjamkan barang sama bersamaan | Hanya satu berhasil | |
+| P-04 | Dua PIC meminjamkan barang sama bersamaan | Hanya satu berhasil (membuktikan `lockForUpdate`, BR-08) | |
 | P-05 | Kembalikan dengan kondisi RR | Kondisi aset RR, tiket pemeliharaan terbuka otomatis | |
 | P-06 | Setujui pengajuan civitas | Peminjam menerima notifikasi | |
 | P-07 | Bangkitkan & setujui DBR ruangan | Status disetujui_pic; menunggu pejabat | |

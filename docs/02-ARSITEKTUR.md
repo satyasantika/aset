@@ -19,10 +19,9 @@ flowchart LR
         API[API baca v1 - Sanctum]
         ACT[Actions + Policies]
     end
-    DB[(MySQL 8.4)]
-    R[(Redis 7)]
-    H[Horizon: impor, ekspor, notifikasi, tautan]
-    S[Scheduler]
+    DB[(MariaDB 10.11+)]
+    Q2[Antrean database: default, berat]
+    S[Scheduler + worker antrean]
     SUR[Sistem Surat] -->|ruangan & jadwal| API
     AKR[Sistem Akreditasi] -.->|ekspor DKPS| F
     A --> F
@@ -35,28 +34,27 @@ flowchart LR
     Q --> ACT
     API --> ACT
     ACT --> DB
-    ACT --> R
-    R --> H
-    H --> DB
-    S --> R
+    ACT --> Q2
+    Q2 --> DB
+    S --> Q2
 ```
 
 ## 2. Stack
 
 | Lapisan | Pilihan | Catatan |
 |---|---|---|
-| Framework | Laravel 13, PHP 8.4 | Proyek baru (`composer create-project`) — kode SIMAN lama tidak dipakai ulang, hanya logika & data |
+| Framework | Laravel 13, PHP 8.5 | Proyek baru (`composer create-project`) — kode SIMAN lama tidak dipakai ulang, hanya logika & data |
 | Panel | Filament 5 (`/admin`) | Admin BMN, pejabat, pimpinan, PIC (desktop) |
 | Halaman lapangan | Livewire 4 + Tailwind 4, `html5-qrcode` (npm) | Pemindaian QR, keranjang peminjaman, inventarisasi, pengajuan civitas — dioptimalkan untuk ponsel |
-| DB | MySQL 8.4 | |
-| Redis | cache, sesi, antrean, lock, rate limit | §4 |
+| DB | MariaDB 10.11+ | |
+| Cache, sesi, antrean, lock, rate limit | Driver `database` (MariaDB), tanpa Redis/Horizon (Profil Ringan, STANDAR-TEKNIS §1b) | §4 |
 | PDF | `barryvdh/laravel-dompdf` | Label QR (A4 multi-label), DBR, berita acara — dirender dari data/snapshot, di-stream |
 | QR | `endroid/qr-code` | URL `/a/{id}` |
 | Excel | Filament Import/Export + `spatie/simple-excel` | Impor aset, impor migrasi, ekspor laporan |
 | Hak akses | `spatie/laravel-permission` + Policy + tabel `ruangan_pic` | |
 | Audit | `spatie/laravel-activitylog` | |
 | API | `laravel/sanctum` (token read-only untuk sistem Surat) | F11 |
-| Uji | Pest 4 (MySQL) | |
+| Uji | Pest 4 (MariaDB) | |
 
 Paket opsional: `bezhansalleh/filament-shield` **tidak** dipakai (kompatibilitas Filament 5 — tulis Policy eksplisit).
 
@@ -92,18 +90,20 @@ app/
 └── Support/             FormatLabelLama (parser label SIMAN-2), Pengaturan, DriveUrl
 ```
 
-## 4. Redis
+## 4. Cache, lock, dan antrean (Profil Ringan)
 
-| Pemakaian | Kunci | Detail |
+Mengikuti STANDAR-TEKNIS §1b: tanpa Redis, tanpa Horizon, tanpa Octane. Cache, sesi, antrean, dan rate limit memakai driver `database`.
+
+| Pemakaian | Mekanisme | Detail |
 |---|---|---|
-| Lock peminjaman | `aset:pinjam:{aset_id}` (10 s) | BR-08, dipakai bersama `lockForUpdate` |
-| Lock mutasi | `aset:mutasi:{aset_id}` | BR-06 |
-| Lock nomor transaksi | `aset:nomor:{jenis}:{tahun}` | Nomor peminjaman `PJM-2026-00001`, mutasi `MUT-2026-0001`, tiket `TKT-...` |
-| Cache master | `aset:master:ruangan`, `aset:master:kodefikasi` | 1 jam, dibersihkan observer |
-| Cache dasbor | `aset:statistik:{dimensi}` | 30 menit, dibersihkan saat aset berubah (debounce via job) |
-| Rate limit | `lookup` 30/menit/IP, `lapor` 5/jam/IP, `login` 5/menit, `api` 60/menit/token | |
-| Antrean | `impor`, `ekspor`, `notifikasi`, `tautan`, `default` | Horizon |
-| Sesi | `SESSION_DRIVER=redis` | |
+| Lock peminjaman | `DB::transaction` + `lockForUpdate()` pada baris aset (dan ruangan bila meminjam ruang) | BR-08; tanpa kunci cache `aset:pinjam:{aset_id}` |
+| Lock mutasi | `DB::transaction` + `lockForUpdate()` pada baris aset | BR-06; tanpa kunci cache `aset:mutasi:{aset_id}` |
+| Lock nomor transaksi | Tabel penomoran per jenis-tahun + `lockForUpdate()` + `UNIQUE(nomor)` | Nomor peminjaman `PJM-2026-00001`, mutasi `MUT-2026-0001`, tiket `TKT-...` |
+| Cache master | `aset:master:ruangan`, `aset:master:kodefikasi` | 1 jam, dibersihkan observer; store `database` |
+| Cache dasbor | `Cache::remember` `aset:statistik:{dimensi}` | 30 menit, `Cache::forget` di observer saat aset berubah; tanpa job debounce |
+| Rate limit | `lookup` 30/menit/IP, `lapor` 5/jam/IP, `login` 5/menit, `api` 60/menit/token | Angka tetap; store `database` |
+| Antrean | `berat` (impor, ekspor); `default` (notifikasi, tautan, lain-lain) | Worker dinyalakan penjadwal (§6, §1b) |
+| Sesi | `SESSION_DRIVER=database` | |
 
 ## 5. Rute publik & lapangan
 
@@ -134,6 +134,8 @@ Pemindai menerima isi QR berupa URL baru (`/a/{id}`) **atau** teks label lama; t
 | Bulanan | `aset:pangkas-peminjaman` | BR-23 retensi |
 | Per jam | `aset:bersihkan-tmp` | `storage/app/tmp` > 24 jam |
 
+Ditambah jadwal standar STANDAR-TEKNIS §1b (worker antrean `default` dan `berat` tiap menit, detak penjadwal, `queue:prune-failed`, `queue:prune-batches`); tanpa `horizon:snapshot`.
+
 ## 7. Notifikasi
 
 Mail + database: `PengajuanPeminjamanBaru` (PIC), `PeminjamanDiputuskan` (peminjam), `PeminjamanTerlambat` (peminjam, PIC), `MutasiDiajukan` (admin), `MutasiDiputuskan` (PIC asal & tujuan), `LaporanKerusakanBaru` (PIC), `DbrMenungguPengesahan` (pejabat), `BeritaAcaraMenungguPengesahan` (pejabat), `TautanBerkasBermasalah`. WhatsApp (gateway HTTP) opsional untuk pengingat terlambat.
@@ -151,7 +153,7 @@ Kebijakan tautan (STANDAR-TEKNIS §1a): foto aset, foto ruangan, dokumen peroleh
 
 ## 10. Docker produksi
 
-Mengikuti pola `docker-apps` FKIP: `app` (PHP-FPM 8.4 + ekstensi intl, gd, redis, pdo_mysql, bcmath, pcntl), `nginx`, `queue` (Horizon), `scheduler`, `mysql`, `redis`.
+Mengikuti pola `docker-apps` FKIP: `app` (PHP-FPM 8.5 + ekstensi intl, gd, pdo_mysql, bcmath, pcntl), `nginx`, `scheduler` (menjalankan jadwal sekaligus worker antrean, §1b); MariaDB native di host, bukan container. Tanpa container `queue`/Horizon dan tanpa Redis.
 
 ## 11. Integrasi dengan Surat
 

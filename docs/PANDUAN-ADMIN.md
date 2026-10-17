@@ -57,7 +57,7 @@ per ruangan, kondisi, peminjaman aktif/terlambat, tiket, dan DBR.
 **Pengaturan sistem**: identitas instansi & penandatangan (kop dokumen), toggle fitur (tambah aset, hapus, ubah kondisi,
 mutasi, peminjaman, tahan mutasi saat inventarisasi), ambang pengingat inventarisasi, retensi peminjaman, maks. hari pinjam.
 **Token API** (untuk Surat): buat token dengan ability `ruangan:baca`/`ruangan:pakai` (lihat `docs/API.md`); token tampil sekali.
-**Horizon** `/horizon` memantau antrean; **Log aktivitas** memuat siapa melakukan apa.
+**Pemantauan antrean**: dasbor `/horizon` hanya ada pada kondisi saat ini; setelah Profil Ringan (Fase B) tidak ada dasbor — gunakan `/api/health` dan notifikasi harian job gagal, penanganan via `queue:failed`/`queue:retry`; **Log aktivitas** memuat siapa melakukan apa.
 
 ## 10. Migrasi dari SIMAN-FKIP-2
 `php artisan siman2:impor <berkas.xlsx>` lalu `siman2:verifikasi`. Panduan, pemetaan pengguna, dan hasil uji ada di
