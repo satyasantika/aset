@@ -89,7 +89,7 @@ it('menyimpan tautan polimorfik, mengisi metadata, dan mengantre pemeriksaan di 
         ->and(app(PenyimpananBerkas::class)->daftar($pemilik, 'foto'))->toHaveCount(1)
         ->and(app(PenyimpananBerkas::class)->daftar($pemilik, 'sk'))->toHaveCount(0);
 
-    Bus::assertDispatched(PeriksaTautanBerkas::class, fn ($job) => $job->queue === 'tautan' && $job->tautanId === $tautan->id);
+    Bus::assertDispatched(PeriksaTautanBerkas::class, fn ($job) => $job->queue === 'default' && $job->tautanId === $tautan->id);
 });
 
 it('menolak tautan tidak valid saat disimpan lewat penyimpanan', function () {

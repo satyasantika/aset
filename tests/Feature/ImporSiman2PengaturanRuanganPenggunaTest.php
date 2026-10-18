@@ -20,6 +20,10 @@ use Tests\Support\Siman2Fixture;
 
 uses(RefreshDatabase::class);
 
+// Import/Export Filament memaksa koneksi antrean 'database-berat' (Profil Ringan) lewat
+// getJobConnection(); jalankan sinkron di sini supaya hasilnya bisa diperiksa langsung di test.
+beforeEach(fn () => config(['queue.connections.database-berat.driver' => 'sync']));
+
 beforeEach(function () {
     $this->seed(PeranDanIzinSeeder::class);
     Notification::fake();
@@ -134,7 +138,7 @@ it('bersifat idempoten: impor ulang tidak menggandakan data dan tidak mengirim s
 
     expect(User::count())->toBe(3)->and(Ruangan::count())->toBe($ruanganAwal)->and(KategoriRuangan::count())->toBe(3)
         ->and(TautanBerkas::count())->toBe(1)->and(DB::table('ruangan_pic')->count())->toBe(3)
-        ->and(ImporSiman2Log::count())->toBe(ImporSiman2Log::query()->distinct()->count(DB::raw('sheet || id_lama')));
+        ->and(ImporSiman2Log::count())->toBe(ImporSiman2Log::query()->distinct()->count(DB::raw('CONCAT(sheet, id_lama)')));
     Notification::assertNothingSent();
 });
 

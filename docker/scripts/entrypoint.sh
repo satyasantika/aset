@@ -1,14 +1,11 @@
 #!/bin/sh
-# Entrypoint SIMAN. Peran `app` (php-fpm) menyiapkan basis data dan cache; peran lain langsung menjalankan perintahnya.
+# Entrypoint SIMAN. Peran `app` (php-fpm) menjalankan migrasi dan menghangatkan cache dari lingkungan RUNTIME;
+# peran lain (scheduler, cadangan) langsung menjalankan perintahnya. Basis data = MariaDB native di host
+# (DB_HOST=host.docker.internal); bila belum terjangkau, migrasi gagal dan kontainer dimulai ulang oleh Docker.
 set -e
 cd /var/www/html
 
 if [ "$1" = "php-fpm" ]; then
-    DB_FILE="${DB_DATABASE:-/data/database.sqlite}"
-    mkdir -p "$(dirname "$DB_FILE")"
-    [ -f "$DB_FILE" ] || touch "$DB_FILE"
-    chown -R www-data:www-data "$(dirname "$DB_FILE")" storage bootstrap/cache
-
     php artisan migrate --force
     php artisan optimize
     php artisan filament:optimize

@@ -8,7 +8,7 @@ use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
 /**
- * Dasar semua laporan ekspor: antrean `ekspor` (Horizon), berkas di disk `tmp` (storage/app/tmp, dibersihkan ≤ 24 jam;
+ * Dasar semua laporan ekspor: antrean `berat` (koneksi `database-berat`, STANDAR-TEKNIS §1b), berkas di disk `tmp` (storage/app/tmp, dibersihkan ≤ 24 jam;
  * STANDAR-TEKNIS §1a: keluaran tidak disimpan permanen), format CSV & XLSX, dan penahanan data pribadi (BR-23).
  */
 abstract class Eksportir extends Exporter
@@ -20,7 +20,12 @@ abstract class Eksportir extends Exporter
 
     public function getJobQueue(): ?string
     {
-        return 'ekspor';
+        return 'berat';
+    }
+
+    public function getJobConnection(): ?string
+    {
+        return 'database-berat';
     }
 
     /** @return array<int, ExportFormat> */

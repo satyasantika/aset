@@ -13,4 +13,3 @@ public/build
 !.env.production.example
 tests
 docs/migrasi
-database/*.sqlite

@@ -22,6 +22,10 @@ use Tests\Support\Siman2Fixture;
 
 uses(RefreshDatabase::class);
 
+// Import/Export Filament memaksa koneksi antrean 'database-berat' (Profil Ringan) lewat
+// getJobConnection(); jalankan sinkron di sini supaya hasilnya bisa diperiksa langsung di test.
+beforeEach(fn () => config(['queue.connections.database-berat.driver' => 'sync']));
+
 beforeEach(function () {
     $this->seed(PeranDanIzinSeeder::class);
     $this->seed(KodefikasiBarangSeeder::class);

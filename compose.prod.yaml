@@ -1,6 +1,15 @@
-# ASET FKIP — produksi. Tanpa MySQL: basis data SQLite (mode WAL) pada volume `data`, dicadangkan harian.
+# ASET FKIP — produksi (Profil Ringan: STANDAR-TEKNIS §1b dan §7).
+# MariaDB berjalan NATIVE di host (DB_HOST=host.docker.internal). Compose ini TIDAK memuat container database,
+# Redis, maupun Horizon; antrean, cache, dan sesi memakai database, worker dinyalakan penjadwal.
 # Jalankan: docker compose -f compose.prod.yaml --env-file .env.production up -d --build
 name: siman
+
+# Log Docker dirotasi (STANDAR-TEKNIS §7.1).
+x-log: &log
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 x-app: &app
   build:
@@ -8,21 +17,16 @@ x-app: &app
     target: runtime
   image: siman-fkip:${APP_VERSION:-latest}
   env_file: .env.production
-  environment:
-    DB_CONNECTION: sqlite
-    DB_DATABASE: /data/database.sqlite
-    REDIS_HOST: redis
+  extra_hosts: ["host.docker.internal:host-gateway"]
   volumes:
-    - data:/data
     - storage:/var/www/html/storage
-  depends_on:
-    redis:
-      condition: service_healthy
+  logging: *log
   restart: unless-stopped
 
 services:
   app:
     <<: *app
+    mem_limit: 512m
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
       interval: 30s
@@ -34,63 +38,42 @@ services:
       context: .
       target: web
     image: siman-fkip-web:${APP_VERSION:-latest}
+    # Hanya loopback: reverse proxy fakultas (nginx host) yang membuka ke publik, TLS di sana.
     ports:
-      - "${WEB_PORT:-8080}:80"
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
     depends_on:
       - app
+    mem_limit: 64m
+    logging: *log
     restart: unless-stopped
 
-  queue:
-    <<: *app
-    command: php artisan horizon
-    healthcheck:
-      test: ["CMD-SHELL", "php artisan horizon:status | grep -q running"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-    depends_on:
-      app:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
+  # Penjadwal sekaligus pemicu worker antrean (routes/console.php: queue:work tiap menit, --stop-when-empty).
+  # Worker berjalan sebagai subproses di container ini: batas memori mencakup worker default (--memory=256)
+  # dan worker berat (--memory=512). Nilai awal; wajib dibuktikan dengan `docker stats` (STANDAR-TEKNIS §7.1).
   scheduler:
     <<: *app
     command: php artisan schedule:work
+    mem_limit: 768m
+    stop_grace_period: 60s
     depends_on:
       app:
         condition: service_healthy
-      redis:
-        condition: service_healthy
 
-  redis:
-    image: redis:7-alpine
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-
+  # Hanya KLIEN dump (mariadb-dump) ke basis data host, bukan server basis data.
   cadangan:
-    image: alpine:3.20
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache sqlite tzdata >/dev/null && exec /cadangan.sh"]
+    <<: *app
+    user: root
+    entrypoint: ["/bin/sh", "/cadangan.sh"]
+    command: []
     environment:
-      DB_DATABASE: /data/database.sqlite
       CADANGAN_DIR: /cadangan
       CADANGAN_HARI: ${CADANGAN_HARI:-30}
       CADANGAN_JAM: ${CADANGAN_JAM:-02:00}
       TZ: Asia/Jakarta
     volumes:
-      - data:/data:ro
       - ./cadangan:/cadangan
       - ./docker/scripts/cadangan.sh:/cadangan.sh:ro
-    restart: unless-stopped
+    mem_limit: 128m
 
 volumes:
-  data:
   storage:
-  redis:

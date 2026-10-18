@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
- * BR-14: hanya SATU periode `berjalan` dalam satu waktu (lock Redis + pemeriksaan dalam transaksi). `rencana` → `berjalan`.
+ * BR-14: hanya SATU periode `berjalan` dalam satu waktu (kunci basis data `penomoran` + pemeriksaan dalam transaksi). `rencana` → `berjalan`.
  */
 class BukaPeriode
 {

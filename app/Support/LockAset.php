@@ -2,24 +2,26 @@
 
 namespace App\Support;
 
+use App\Models\Aset;
 use Closure;
-use Illuminate\Contracts\Cache\Lock;
-use Illuminate\Contracts\Cache\LockTimeoutException;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Lock Redis per aset (`aset:{jenis}:{aset_id}`, STANDAR §4) untuk peminjaman & mutasi. Kunci diambil terurut agar
- * tidak terjadi deadlock; dipadukan dengan `lockForUpdate` di dalam transaksi oleh pemanggil.
+ * Seksi kritis berbasis basis data (STANDAR-TEKNIS §1b, Profil Ringan): `DB::transaction` + `lockForUpdate`,
+ * tanpa kunci cache atau Redis. Kunci selalu diambil terurut agar tidak terjadi deadlock; pemanggil tetap memeriksa ulang
+ * keadaan (ketersediaan, status) di dalam kunci. Kunci dilepas saat transaksi terluar selesai. Waktu tunggu mengikuti
+ * `aset.lock_tunggu_detik` (innodb_lock_wait_timeout sesi); timeout/deadlock menjadi galat validasi yang ramah.
  */
 class LockAset
 {
-    public const DETIK_LOCK = 10;
-
     public const DETIK_TUNGGU = 5;
 
+    private const GALAT_LOCK = [1205, 1213]; // lock wait timeout, deadlock
+
     /**
-     * Lock tunggal bernama (mis. penomoran, pembukaan periode). Gagal mendapatkan lock → galat validasi yang ramah.
+     * Seksi kritis bernama (penomoran, pembukaan periode, DBL): mengunci satu baris `penomoran`.
      *
      * @template T
      *
@@ -28,22 +30,18 @@ class LockAset
      */
     public static function satu(string $kunci, Closure $di, ?int $tungguDetik = null): mixed
     {
-        $lock = Cache::lock($kunci, self::DETIK_LOCK);
+        return self::dalamTransaksi('status', 'Proses serupa sedang berjalan. Coba lagi sebentar.', $tungguDetik, function () use ($kunci, $di) {
+            DB::table('penomoran')->insertOrIgnore(['kunci' => $kunci, 'terakhir' => 0]);
+            DB::table('penomoran')->where('kunci', $kunci)->lockForUpdate()->value('terakhir');
 
-        try {
-            $lock->block($tungguDetik ?? (int) config('aset.lock_tunggu_detik', self::DETIK_TUNGGU));
-        } catch (LockTimeoutException) {
-            throw ValidationException::withMessages(['status' => 'Proses serupa sedang berjalan. Coba lagi sebentar.']);
-        }
-
-        try {
             return $di();
-        } finally {
-            $lock->release();
-        }
+        });
     }
 
     /**
+     * Mengunci baris aset terurut (peminjaman dan mutasi memakai kunci yang sama: satu aset diproses satu per satu).
+     * `$jenis` dipertahankan agar pemanggil tidak berubah; tidak lagi membedakan kunci.
+     *
      * @template T
      *
      * @param  list<string>  $idAset
@@ -55,26 +53,43 @@ class LockAset
         $ids = array_values(array_unique($idAset));
         sort($ids);
 
-        /** @var list<Lock> $kunci */
-        $kunci = [];
-
-        try {
-            foreach ($ids as $id) {
-                $lock = Cache::lock("aset:{$jenis}:{$id}", self::DETIK_LOCK);
-
-                try {
-                    $lock->block($tungguDetik ?? (int) config('aset.lock_tunggu_detik', self::DETIK_TUNGGU));
-                } catch (LockTimeoutException) {
-                    throw ValidationException::withMessages(['aset' => 'Aset sedang diproses pengguna lain. Coba lagi sebentar.']);
-                }
-
-                $kunci[] = $lock;
+        return self::dalamTransaksi('aset', 'Aset sedang diproses pengguna lain. Coba lagi sebentar.', $tungguDetik, function () use ($ids, $di) {
+            if ($ids !== []) {
+                Aset::query()->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->pluck('id');
             }
 
             return $di();
+        });
+    }
+
+    /**
+     * @template T
+     *
+     * @param  Closure(): T  $di
+     * @return T
+     */
+    private static function dalamTransaksi(string $kolom, string $pesan, ?int $tungguDetik, Closure $di): mixed
+    {
+        $detik = max(1, $tungguDetik ?? (int) config('aset.lock_tunggu_detik', self::DETIK_TUNGGU));
+        $mariadb = in_array(DB::connection()->getDriverName(), ['mariadb', 'mysql'], true);
+        $semula = null;
+
+        if ($mariadb) {
+            $semula = (int) DB::scalar('select @@session.innodb_lock_wait_timeout');
+            DB::statement('set session innodb_lock_wait_timeout = '.$detik);
+        }
+
+        try {
+            return DB::transaction($di);
+        } catch (QueryException $e) {
+            if (in_array($e->errorInfo[1] ?? null, self::GALAT_LOCK, true)) {
+                throw ValidationException::withMessages([$kolom => $pesan]);
+            }
+
+            throw $e;
         } finally {
-            foreach (array_reverse($kunci) as $lock) {
-                $lock->release();
+            if ($semula !== null) {
+                DB::statement('set session innodb_lock_wait_timeout = '.$semula);
             }
         }
     }

@@ -44,11 +44,6 @@ it('mengizinkan semua aksi untuk super-admin lewat Gate::before', function () {
     expect($user->can('izin-yang-tidak-terdaftar'))->toBeTrue();
 });
 
-it('hanya menjaga Horizon untuk super-admin', function () {
-    expect(penggunaDenganPeran('super-admin')->can('viewHorizon'))->toBeTrue()
-        ->and(penggunaDenganPeran('admin-bmn')->can('viewHorizon'))->toBeFalse();
-});
-
 it('membatasi akses panel: aktif dan bukan hanya civitas', function (string $peran, bool $aktif, bool $boleh) {
     $user = penggunaDenganPeran($peran, $aktif);
 
