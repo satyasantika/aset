@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\CarbonInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +34,10 @@ class HealthController extends Controller
         ], $db ? 200 : 503);
     }
 
+    /**
+     * Detak ditulis routes/console.php sebagai cap waktu (int): cache `database` tidak mengembalikan objek Carbon
+     * (cache.serializable_classes = false).
+     */
     private function detakPenjadwal(): string
     {
         try {
@@ -43,11 +46,11 @@ class HealthController extends Controller
             return 'gagal';
         }
 
-        if (! $detak instanceof CarbonInterface) {
+        if (! is_int($detak)) {
             return 'belum-ada';
         }
 
-        return $detak->diffInMinutes(now(), true) > self::DETAK_MAKS_MENIT ? 'terlambat' : 'ok';
+        return (now()->getTimestamp() - $detak) > self::DETAK_MAKS_MENIT * 60 ? 'terlambat' : 'ok';
     }
 
     private function hitung(callable $hitung): int|string

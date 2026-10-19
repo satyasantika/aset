@@ -22,8 +22,9 @@ Schedule::command('queue:work database --queue=default --stop-when-empty --max-t
 Schedule::command('queue:work database-berat --queue=berat --stop-when-empty --max-time=600 --timeout=900 --tries=2 --memory=512')
     ->everyMinute()->withoutOverlapping(30)->runInBackground();
 
-// Detak penjadwal: dibaca /api/health; peringatan bila lebih tua dari 5 menit.
-Schedule::call(fn () => cache()->put(config('app.kode').':detak-penjadwal', now(), 600))
+// Detak penjadwal: dibaca /api/health (peringatan bila > 5 menit). Cap waktu (int), bukan objek Carbon:
+// cache database tidak mengembalikan objek (cache.serializable_classes = false).
+Schedule::call(fn () => cache()->put(config('app.kode').':detak-penjadwal', now()->getTimestamp(), 600))
     ->everyMinute()->name('detak-penjadwal');
 
 Schedule::command('queue:prune-failed --hours=720')->dailyAt('03:00');
