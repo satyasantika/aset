@@ -13,7 +13,6 @@ use App\Support\Pengaturan;
 use Database\Seeders\PeranDanIzinSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -80,19 +79,18 @@ it('dua PIC meminjamkan aset yang sama bersamaan → hanya satu berhasil (BR-08)
     expect(Peminjaman::count())->toBe(1)->and(Peminjaman::first()->nama_peminjam)->toBe('Pertama');
 });
 
-it('lock Redis per aset yang sedang dipegang proses lain membuat pencatatan gagal rapi', function () {
+it('pencatatan mengunci baris aset dengan lockForUpdate sebelum memeriksa ketersediaan', function () {
     $r = ruangPjm('R-1');
     $pic = orangPjm('pic-ruangan', [$r]);
     $aset = asetPinjam($r);
 
-    $lockProsesLain = Cache::lock("aset:pinjam:{$aset->id}", 10);
-    expect($lockProsesLain->get())->toBeTrue();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    $status = catat([$aset->id], $pic)->status;
+    $kunci = collect(DB::getQueryLog())->pluck('query')->filter(fn (string $q) => str_contains($q, 'from `aset`') && str_contains($q, 'for update'));
+    DB::disableQueryLog();
 
-    expect(fn () => catat([$aset->id], $pic))->toThrow(ValidationException::class, 'sedang diproses pengguna lain');
-    expect(Peminjaman::count())->toBe(0);
-
-    $lockProsesLain->release();
-    expect(catat([$aset->id], $pic)->status)->toBe(StatusPeminjaman::Dipinjam);
+    expect($status)->toBe(StatusPeminjaman::Dipinjam)->and($kunci)->not->toBeEmpty();
 });
 
 it('keranjang semua-atau-tidak-sama-sekali: satu aset tidak tersedia menggagalkan semuanya (BR-08)', function () {

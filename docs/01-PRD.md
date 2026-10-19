@@ -1,6 +1,6 @@
 # 01 — PRD: ASET FKIP 3 (Sistem Aset/BMN dan Peminjaman)
 
-> Pembangunan ulang SIMAN-FKIP-2 (Vue + Google Apps Script + Google Sheets) menjadi Laravel 13 + MySQL 8.4 + Redis 7.
+> Pembangunan ulang SIMAN-FKIP-2 (Vue + Google Apps Script + Google Sheets) menjadi Laravel 13 + MariaDB 10.11+ (Profil Ringan: tanpa Redis/Horizon, STANDAR-TEKNIS §1b).
 > Baca dulu `00-ANALISIS-SISTEM-BERJALAN.md` (apa yang dipertahankan & diperbaiki) dan `06-REKOMENDASI-REGULASI.md` (tambahan berdasarkan aturan). Butir **(perlu verifikasi)** wajib dipastikan sebelum fase terkait.
 
 ## 1. Latar belakang
@@ -22,7 +22,7 @@ Rincian rekomendasi: `06-REKOMENDASI-REGULASI.md` (RG-01 s.d. RG-13).
 
 | Peran | Pemegang | Ringkasan |
 |---|---|---|
-| `super-admin` | TI fakultas | Semua, termasuk pengguna, pengaturan, Horizon |
+| `super-admin` | TI fakultas | Semua, termasuk pengguna, pengaturan, pemantauan antrean (`/api/health`) |
 | `admin-bmn` | Operator BMN / Subbag Umum fakultas | Semua aset & master, setujui mutasi, kelola inventarisasi, usulan penghapusan, laporan & ekspor |
 | `pejabat-penatausahaan` | Kasubag Umum / pejabat yang ditunjuk (**perlu verifikasi** struktur) | Menandatangani DBR & berita acara inventarisasi (persetujuan di sistem), menyetujui usulan penghapusan internal, memutuskan permohonan pihak luar |
 | `pic-ruangan` | Laboran, staf, dosen penanggung jawab ruang | Aset di ruangan yang ditugaskan: ubah kondisi, catat peminjaman keluar/masuk, ajukan mutasi, proses permohonan peminjaman ruangannya, inventarisasi ruangannya, cetak label |
@@ -60,7 +60,7 @@ Keterangan: **S** semua; **R** ruangan yang ditugaskan; **M** milik sendiri; **�
 | Laporan & ekspor | S | S | S | R | S (tanpa data pribadi) | — | — |
 | Data pribadi peminjam/pelapor | S | S | S | R | — | M | — |
 | Pengguna & peran | S | penugasan PIC | — | — | — | — | — |
-| Pengaturan sistem, Horizon | S | — | — | — | — | — | — |
+| Pengaturan sistem, pemantauan antrean (`/api/health`) | S | — | — | — | — | — | — |
 
 ## 4. Modul dan kode cakupan commit
 
@@ -110,7 +110,7 @@ Keterangan: **S** semua; **R** ruangan yang ditugaskan; **M** milik sendiri; **�
 | BR-05 | PIC hanya dapat mengubah kondisi, mencatat peminjaman, mengajukan mutasi, dan memindai inventarisasi untuk aset di ruangan yang ditugaskan kepadanya (`ruangan_pic`). |
 | BR-06 | Mutasi lokasi: pengajuan (satu/lebih aset dari satu ruangan asal ke satu ruangan tujuan, alasan wajib) → `disetujui`/`ditolak` oleh admin-bmn. Saat disetujui, dalam satu transaksi: `aset.ruangan_id` berubah, riwayat lokasi tercatat, DBR ruangan asal & tujuan ditandai `perlu_diperbarui`. Aset yang sedang dipinjam/dalam perbaikan tidak dapat dimutasi. |
 | BR-07 | Peminjaman internal hanya untuk civitas (akun surel unsil) atau dicatat PIC atas nama peminjam internal. Permohonan pihak luar tidak diproses sebagai peminjaman; ditandai `pihak_luar` dan diteruskan ke pejabat-penatausahaan (skema pemanfaatan/sewa **perlu verifikasi**). |
-| BR-08 | Satu aset tidak boleh memiliki dua peminjaman aktif/tersetujui yang rentang waktunya tumpang tindih. Ditegakkan dalam transaksi dengan `lockForUpdate` pada baris aset + `Cache::lock("aset:pinjam:{aset_id}")`. Keranjang bersifat semua-atau-tidak-sama-sekali. |
+| BR-08 | Satu aset tidak boleh memiliki dua peminjaman aktif/tersetujui yang rentang waktunya tumpang tindih. Ditegakkan dalam transaksi dengan `DB::transaction` + `lockForUpdate()` pada baris aset (dan ruangan bila meminjam ruang), tanpa kunci cache (§1b). Keranjang bersifat semua-atau-tidak-sama-sekali. |
 | BR-09 | Alur peminjaman: `diajukan` → `disetujui`/`ditolak` (PIC ruangan asal atau admin) → `dipinjam` (serah terima dicatat) → `dikembalikan` (kondisi saat kembali wajib) ; `dibatalkan` sebelum dipinjam. Catat langsung oleh PIC langsung berstatus `dipinjam`. Terlambat = `dipinjam` dan `rencana_kembali` < sekarang (dihitung, bukan status). |
 | BR-10 | Kondisi saat kembali berbeda dari kondisi saat pinjam → kondisi aset diperbarui (BR-03, sumber `peminjaman`) dan, bila RR/RB, tiket pemeliharaan dibuat otomatis. |
 | BR-11 | Aset `dalam_perbaikan`, `diusulkan_hapus`, `hilang`, `dihapus`, atau kondisi RB tidak dapat dipinjam. |
@@ -177,7 +177,7 @@ stateDiagram-v2
 | Konkurensi | Peminjaman & mutasi transaksional (BR-08) |
 | Ponsel | Pemindaian QR, peminjaman, lapor kerusakan, dan inventarisasi nyaman di ponsel (kamera via `html5-qrcode`) |
 | Audit | Activitylog semua model domain; riwayat kondisi, lokasi, status |
-| Cadangan | Backup harian MySQL ≥ 30 hari; uji pulih per semester |
+| Cadangan | Backup harian MariaDB ≥ 30 hari; uji pulih per semester |
 | Bahasa | Indonesia; tanggal `d F Y` |
 
 ## 9. Laporan & ekspor

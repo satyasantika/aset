@@ -103,7 +103,7 @@ test('notifikasi diantrekan ke notifikasi, via database dan mail, tanpa WhatsApp
     $n = new PengajuanPeminjamanBaru(Peminjaman::factory()->make());
     $u = User::factory()->make(['email' => 'a@unsil.ac.id']);
 
-    expect($n->queue)->toBe('notifikasi')->and($n->via($u))->toBe(['database', 'mail']);
+    expect($n->queue)->toBe('default')->and($n->via($u))->toBe(['database', 'mail']);
 });
 
 test('DBR disetujui PIC dan periode ditutup memberi tahu pejabat penatausahaan saja', function () {

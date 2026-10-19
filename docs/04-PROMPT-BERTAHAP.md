@@ -1,7 +1,7 @@
 # 04 — Prompt Bertahap Vibecoding: ASET FKIP 3
 
 > Kerjakan berurutan; satu langkah = satu sesi agen = satu commit yang lolos uji. Rujukan: `00-ANALISIS`, `01-PRD` (BR-xx), `02-ARSITEKTUR`, `03-SKEMA-DATABASE`, `06-REKOMENDASI-REGULASI` (RG-xx), `07-MIGRASI-DATA`, standar bersama. Di repo, semua dokumen disalin ke `docs/`.
-> Perintah memakai Laravel Sail (`sail` = `./vendor/bin/sail`); bila memakai Herd, hilangkan awalan `sail`.
+> Perintah PHP/Composer/NPM dijalankan di dalam container lewat alias shell `asp` (= `docker compose exec aset-php`), mengikuti Docker FKIP (STANDAR-TEKNIS §2); bukan Laravel Sail dan bukan PHP di host.
 > Kalimat penutup baku setiap prompt: *"Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan."*
 
 ## Peta fase
@@ -9,7 +9,7 @@
 | Fase | Isi | Branch | Tag |
 |---|---|---|---|
 | F0 | Repositori & pagar git | `chore/f0-repo` | — |
-| F1 | Fondasi Laravel 13, Sail, MySQL, Redis, Horizon, kualitas, UUIDv7, CI | `feat/f1-fondasi` | `v0.1.0` |
+| F1 | Fondasi Laravel 13, Docker FKIP, MariaDB native, antrean database (Profil Ringan), kualitas, UUIDv7, CI | `feat/f1-fondasi` | `v0.1.0` |
 | F2 | Login, peran, PIC ruangan, audit | `feat/f2-auth-peran` | `v0.2.0` |
 | F3 | Master: gedung, ruangan, prodi, kodefikasi, pengaturan, tautan berkas | `feat/f3-master` | `v0.3.0` |
 | F4 | Aset per kode+NUP, kondisi, label QR, lookup publik | `feat/f4-aset-label` | `v0.4.0` |
@@ -63,35 +63,43 @@ git commit -m "docs: tambah changelog dan templat pull request"
 
 ## F1 — Fondasi
 
-### F1.1 — Laravel 13 + Sail (MySQL, Redis, Mailpit)
+### F1.1 — Laravel 13 + Docker FKIP (MariaDB native di host, Mailpit bersama; tanpa Redis)
 **Branch:** `feat/f1-fondasi`
 
 Sebelum prompt: `git switch -c feat/f1-fondasi`.
 
 **Prompt (salin ke agen AI):**
 ```text
-Pasang Laravel 13 di repo ini (composer create-project laravel/laravel ke folder sementara lalu pindahkan,
-tanpa menimpa docs/, CLAUDE.md, .githooks/). php artisan sail:install --with=mysql,redis,mailpit.
-config/app.php timezone Asia/Jakarta, locale id, faker id_ID. .env.example: DB_DATABASE=siman,
-CACHE_STORE=redis, SESSION_DRIVER=redis, QUEUE_CONNECTION=redis, REDIS_CACHE_DB=1, REDIS_QUEUE_DB=2,
-CACHE_PREFIX=siman_. AppServiceProvider: Carbon locale id, preventLazyLoading & preventSilentlyDiscardingAttributes
-di non-produksi, Date::use(CarbonImmutable). Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai
-jalankan sail up -d, sail artisan migrate, lalu tampilkan ringkasan perubahan.
+Baca STANDAR-TEKNIS §2 (Docker FKIP, tanpa Sail). 1) Buat docker/php/Dockerfile (php:8.5-fpm, ekstensi
+pdo_mysql, redis, intl, gd, bcmath, pcntl, zip, exif, opcache; Composer; Node 22), docker/nginx/default.conf, dan
+docker-compose.yml persis templat §2.3: container aset-php, aset-nginx (port 8012), aset-scheduler
+(php artisan schedule:work), extra_hosts host.docker.internal:host-gateway, jaringan fkip-net (external).
+Tidak ada container MariaDB atau Mailpit di repo: MariaDB NATIVE di host (database db_aset dan db_aset_testing,
+dibuat manual menurut §2.2) dan Mailpit bersama. 2) Pasang Laravel 13 lewat container composer:2 ke folder
+sementara (create-project laravel/laravel _laravel "^13.0") lalu pindahkan ke root tanpa menimpa docs/,
+CLAUDE.md, .githooks/; jangan memakai sail:install. Alias shell: asp = docker compose exec aset-php.
+3) config/app.php timezone Asia/Jakarta, locale id, faker id_ID, kunci kode (APP_KODE=aset). .env.example persis
+STANDAR-TEKNIS §3: DB_CONNECTION=mariadb, DB_HOST=host.docker.internal, DB_DATABASE=db_aset, DB_USERNAME=aset,
+CACHE_STORE=database, SESSION_DRIVER=database, QUEUE_CONNECTION=database (tanpa REDIS_*), CACHE_PREFIX=aset_cache_,
+SESSION_COOKIE=aset_session, MAIL_HOST=mailpit. AppServiceProvider: Carbon locale id, preventLazyLoading &
+preventSilentlyDiscardingAttributes di non-produksi, Date::use(CarbonImmutable). Jangan ubah berkas di luar
+cakupan langkah ini. Setelah selesai jalankan docker compose up -d --build, asp php artisan migrate, lalu
+tampilkan ringkasan perubahan.
 ```
 
-**Selesai bila:** `sail artisan about` menunjukkan Laravel 13, MySQL & Redis terhubung.
+**Selesai bila:** `asp php artisan about` menunjukkan Laravel 13, PHP 8.5, MariaDB terhubung ke `db_aset` (tanpa Redis); `http://localhost:8012` merespons.
 
 **Commit:**
 ```bash
 git add -A
-git commit -m "build: pasang laravel 13 dengan sail, mysql, redis, dan mailpit"
+git commit -m "build: pasang laravel 13 dengan docker fkip dan mariadb native"
 ```
 
 ### F1.2 — Gerbang kualitas & aktivasi hook
 **Prompt (salin ke agen AI):**
 ```text
 Pasang pestphp/pest ^4 + pest-plugin-laravel, larastan/larastan (level 6), pint preset laravel. phpunit.xml
-memakai MySQL database siman_testing (buat di docker init), CACHE_STORE=array, QUEUE_CONNECTION=sync,
+memakai MariaDB native database db_aset_testing (dibuat manual menurut STANDAR-TEKNIS §2.2; DB_HOST=host.docker.internal), CACHE_STORE=array, QUEUE_CONNECTION=sync,
 SESSION_DRIVER=array. Script composer "cek": pint --test, phpstan, pest. Satu test asap: GET /up 200 dan
 locale 'id'. Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu
 tampilkan ringkasan perubahan.
@@ -101,27 +109,27 @@ Setelah selesai: `git config core.hooksPath .githooks`.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "chore(config): pasang pest, larastan, pint, dan aktifkan hook"
 ```
 
-### F1.3 — Filament 5, Horizon, activitylog, permission, Sanctum
+### F1.3 — Filament 5, antrean database & penjadwal (§1b), activitylog, permission, Sanctum
 **Prompt (salin ke agen AI):**
 ```text
-composer require filament/filament:^5.0 laravel/horizon spatie/laravel-permission spatie/laravel-activitylog
+composer require filament/filament:^5.0 spatie/laravel-permission spatie/laravel-activitylog
 laravel/sanctum barryvdh/laravel-dompdf endroid/qr-code spatie/simple-excel. Panel Filament id 'admin' path
-/admin (tanpa registrasi, warna primer biru, databaseNotifications). horizon:install dengan supervisor untuk
-antrean impor, ekspor, notifikasi, tautan, default. Publish & migrate permission + activitylog (retensi 730 hari).
-install:api (Sanctum). Gate viewHorizon sementara via env HORIZON_EMAILS. Jangan ubah berkas di luar cakupan
+/admin (tanpa registrasi, warna primer biru, databaseNotifications). Antrean database dengan dua antrean `default` dan `berat` (impor, ekspor = `berat`; lainnya = `default`),
+config/queue.php dan routes/console.php sesuai STANDAR-TEKNIS §1b (worker dinyalakan penjadwal, tanpa Horizon). Publish & migrate permission + activitylog (retensi 730 hari).
+install:api (Sanctum). Migrasi tabel jobs, job_batches, failed_jobs, cache, cache_locks, sessions. Jangan ubah berkas di luar cakupan
 langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 ```
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
-git commit -m "build(deps): pasang filament 5, horizon, permission, activitylog, dan sanctum"
+git commit -m "build(deps): pasang filament 5, antrean database, permission, activitylog, dan sanctum"
 ```
 
 ### F1.4 — Kunci primer UUIDv7
@@ -136,17 +144,17 @@ tabel notifications, Sanctum personal_access_tokens, tabel impor/ekspor Filament
 kustomnya PERSIS §4a butir 5; paket yang dipasang di langkah berikutnya disesuaikan pada langkah pemasangannya.
 3) tests/Arch/UuidTest.php: semua kelas di app/Models memakai HasUuids; tidak ada migrasi (kecuali tabel
 infrastruktur §4a butir 6) yang memuat ->id(), foreignId(, morphs( tanpa awalan uuid/nullableUuid, bigIncrements(,
-atau increments(. 4) UserFactory & seeder tetap berjalan. 5) php artisan migrate:fresh (belum ada data).
+atau increments(. 4) UserFactory & seeder tetap berjalan. 5) Gerbang uji tipe (STANDAR-TEKNIS §4a butir 1; tests/Feature/UuidSkemaTest.php): kolom id bertipe uuid/char(36), FK dan morph berfungsi, 100 id UUIDv7 yang disisipkan berurutan terbaca ORDER BY id dengan urutan sama. Larang char('id',36) dan binary(16) eksplisit. 6) php artisan migrate:fresh (belum ada data).
 Test: User::factory()->create()->id lolos Str::isUuid() dan berversi 7 (karakter ke-15 = '7'); route model
 binding dengan UUID berjalan. Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan
 test, lalu tampilkan ringkasan perubahan.
 ```
 
-**Selesai bila:** `UuidTest` hijau; kolom `users.id` bertipe CHAR(36); tidak ada `->id()` di migrasi aplikasi.
+**Selesai bila:** `UuidTest` hijau; kolom `users.id` bertipe `uuid` (MariaDB) atau `char(36)` (driver lain); tidak ada `->id()` di migrasi aplikasi.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "refactor(db): pakai uuidv7 sebagai primary key semua tabel"
 ```
@@ -154,14 +162,14 @@ git commit -m "refactor(db): pakai uuidv7 sebagai primary key semua tabel"
 ### F1.5 — Laravel Boost & endpoint kesehatan
 **Prompt (salin ke agen AI):**
 ```text
-composer require laravel/boost --dev; php artisan boost:install. GET /api/health → {app, versi, db, redis}
-200/503; versi aplikasi (env APP_VERSION) di footer panel. Test health. Jangan ubah berkas di luar cakupan
+composer require laravel/boost --dev; php artisan boost:install. GET /api/health → {app, versi, db, job tertunda, failed_jobs 24 jam, detak penjadwal}
+200/503 (STANDAR-TEKNIS §1b); versi aplikasi (env APP_VERSION) di footer panel. Test health. Jangan ubah berkas di luar cakupan
 langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 ```
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "chore: pasang laravel boost dan endpoint kesehatan"
 ```
@@ -169,7 +177,7 @@ git commit -m "chore: pasang laravel boost dan endpoint kesehatan"
 ### F1.6 — CI
 **Prompt (salin ke agen AI):**
 ```text
-.github/workflows/ci.yml: service mysql:8.4 & redis:7, PHP 8.4 (intl, gd, redis, bcmath, pcntl), composer
+.github/workflows/ci.yml: service container mariadb:10.11 SEMENTARA hanya untuk job CI (bukan bagian repo/compose; tanpa Redis), PHP 8.5 (intl, gd, bcmath, pcntl), composer
 install, npm ci && npm run build, pint --test, phpstan, pest --parallel. Tampilkan ringkasan.
 ```
 
@@ -200,14 +208,14 @@ Baca 01-PRD §3 & §3.1 dan 03-SKEMA §8. 1) Migrasi users: nip, no_hp, aktif. U
 (canAccessPanel: aktif && punya peran selain civitas, ATAU civitas hanya ke halaman Livewire). Surel wajib
 domain unsil.ac.id (rule SurelDomainUnsil). 2) PeranDanIzinSeeder idempoten: peran super-admin, admin-bmn,
 pejabat-penatausahaan, pic-ruangan, pimpinan, civitas dan permission 03 §8, dipetakan sesuai matriks PRD §3.1.
-Gate::before super-admin; viewHorizon → super-admin. 3) Test matriks permission per peran (dataset).
+Gate::before super-admin; pemantauan antrean lewat /api/health (tanpa Horizon). 3) Test matriks permission per peran (dataset).
 Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan
 ringkasan perubahan.
 ```
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(peran): tambah peran bmn dan matriks permission"
 ```
@@ -224,7 +232,7 @@ Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(auth): tambah login aman dengan mfa admin dan pembatasan"
 ```
@@ -241,7 +249,7 @@ jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(audit): tambah jejak audit dengan pelaku dari autentikasi"
 ```
@@ -257,7 +265,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(auth): tambah kelola pengguna dan peran"
 ```
@@ -286,7 +294,7 @@ cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ring
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(master): tambah gedung, kategori ruangan, dan prodi"
 ```
@@ -303,7 +311,7 @@ dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(master): tambah ruangan dan penugasan pic"
 ```
@@ -312,7 +320,7 @@ git commit -m "feat(master): tambah ruangan dan penugasan pic"
 **Prompt (salin ke agen AI):**
 ```text
 Baca RG-06 dan 03-SKEMA kodefikasi_barang. Migrasi, model, KodefikasiResource, Filament Importer CSV
-(kode, uraian, tingkat, induk_kode, kategori_lokal) via antrean impor (berkas di storage/app/tmp, dihapus).
+(kode, uraian, tingkat, induk_kode, kategori_lokal) via antrean berat (impor; berkas di storage/app/tmp, dihapus).
 Rule KodeBarangValid (ada di kodefikasi, tingkat 5). Seeder contoh beberapa kode (tandai "CONTOH — impor
 referensi resmi", sumber perlu verifikasi). Test impor & rule. Jangan ubah berkas di luar cakupan langkah ini.
 Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
@@ -320,7 +328,7 @@ Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(master): tambah kodefikasi barang bmn dengan impor csv"
 ```
@@ -331,7 +339,7 @@ git commit -m "feat(master): tambah kodefikasi barang bmn dengan impor csv"
 Baca 03-SKEMA §6 dan STANDAR-TEKNIS §1a. 1) Tabel pengaturan + App\Support\Pengaturan (cache), seeder identitas
 & penandatangan & toggle fitur (BR-22) & ambang/retensi; halaman PengaturanSistem (super-admin). 2) Fondasi
 tautan berkas PERSIS §1a: config/berkas.php, tabel tautan_berkas polimorfik, rule TautanBerkasValid, kontrak
-PenyimpananBerkas + TautanEksternal, job PeriksaTautanBerkas (antrean tautan, anti-SSRF), komponen
+PenyimpananBerkas + TautanEksternal, job PeriksaTautanBerkas (antrean default, anti-SSRF), komponen
 x-tautan-berkas (foto Drive via lh3.googleusercontent.com/d/<id>). Test validasi tautan, toggle fitur dibaca
 dari pengaturan, tidak ada FileUpload selain Importer (test arsitektur). Jangan ubah berkas di luar cakupan
 langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
@@ -339,7 +347,7 @@ langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan pe
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(pengaturan): tambah pengaturan sistem dan tautan berkas"
 ```
@@ -370,7 +378,7 @@ selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(aset): tambah tabel aset per kode dan nup beserta riwayat"
 ```
@@ -389,7 +397,7 @@ Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(aset): tambah resource aset dan pendaftaran massal"
 ```
@@ -405,7 +413,7 @@ langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan pe
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(aset): tambah perubahan kondisi dan status beserta riwayat"
 ```
@@ -424,7 +432,7 @@ jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(label): tambah cetak label qr berbasis id di server"
 ```
@@ -445,7 +453,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(publik): tambah lookup qr publik dan resolusi label lama"
 ```
@@ -467,7 +475,7 @@ git switch main && git pull && git tag -a v0.4.0 -m "Fase 4: aset dan label" && 
 **Prompt (salin ke agen AI):**
 ```text
 Baca BR-06 dan US-MUT-01. Migrasi mutasi & mutasi_item; enum StatusMutasi; nomor MUT-{tahun}-{4 digit} via
-Cache::lock. Actions AjukanMutasi (PIC ruangan asal; aset tidak sedang dipinjam/dalam perbaikan; toggle mutasi),
+tabel penomoran per jenis-tahun + lockForUpdate + UNIQUE(nomor). Actions AjukanMutasi (PIC ruangan asal; aset tidak sedang dipinjam/dalam perbaikan; toggle mutasi),
 SetujuiMutasi (transaksi + lockForUpdate setiap aset: ubah ruangan_id, riwayat_lokasi_aset, tandai DBR asal &
 tujuan perlu_diperbarui — panggil stub yang diisi F9), TolakMutasi (catatan wajib). MutasiResource + aksi dari
 halaman aset & /pindai. Identitas aset TIDAK pernah dinomori ulang (R-17). Test: alur penuh; dua admin menyetujui
@@ -477,7 +485,7 @@ Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(mutasi): tambah pengajuan dan persetujuan mutasi lokasi"
 ```
@@ -499,7 +507,7 @@ git switch main && git pull && git tag -a v0.5.0 -m "Fase 5: mutasi" && git push
 **Prompt (salin ke agen AI):**
 ```text
 Baca BR-07–BR-11 dan 03-SKEMA §4 peminjaman. Migrasi peminjaman & peminjaman_item; enum StatusPeminjaman,
-JenisPeminjam; nomor PJM-{tahun}-{5 digit}. Action CekKetersediaan(aset, mulai, selesai): tolak bila status/kondisi
+JenisPeminjam; nomor PJM-{tahun}-{5 digit} via tabel penomoran per jenis-tahun + lockForUpdate + UNIQUE(nomor). Action CekKetersediaan(aset, mulai, selesai): tolak bila status/kondisi
 BR-11 atau ada peminjaman aktif/tersetujui tumpang tindih. Test rentang tumpang tindih (batas tepat
 bersinggungan diperbolehkan). Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan
 test, lalu tampilkan ringkasan perubahan.
@@ -507,7 +515,7 @@ test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(peminjaman): tambah skema peminjaman dan cek ketersediaan"
 ```
@@ -517,7 +525,7 @@ git commit -m "feat(peminjaman): tambah skema peminjaman dan cek ketersediaan"
 ```text
 Baca US-PJM-01, BR-08, BR-09. Livewire /keranjang: tambah aset via pindai/cari (hanya ruangan PIC), data
 peminjam (pilih user civitas atau nama+unit+kontak), keperluan, rencana kembali (≤ pengaturan maks_hari_pinjam).
-Action CatatPeminjamanLangsung: transaksi, lockForUpdate + Cache::lock per aset, semua-atau-tidak, status dipinjam,
+Action CatatPeminjamanLangsung: transaksi, DB::transaction + lockForUpdate pada baris aset (tanpa Cache::lock), semua-atau-tidak, status dipinjam,
 kondisi_saat_pinjam. Test: dua PIC meminjamkan aset sama bersamaan → satu berhasil; satu aset tak tersedia →
 seluruh keranjang gagal. Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test,
 lalu tampilkan ringkasan perubahan.
@@ -525,7 +533,7 @@ lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(peminjaman): tambah keranjang peminjaman pic dengan penguncian"
 ```
@@ -543,7 +551,7 @@ berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(peminjaman): tambah pengajuan online civitas dan persetujuan"
 ```
@@ -561,7 +569,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(peminjaman): tambah pengembalian dan daftar keterlambatan"
 ```
@@ -594,7 +602,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(migrasi): tambah impor siman2 untuk pengaturan, ruangan, dan pengguna"
 ```
@@ -613,7 +621,7 @@ jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(migrasi): tambah impor inventaris dengan pemecahan unit dan label lama"
 ```
@@ -630,13 +638,13 @@ cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ring
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(migrasi): tambah impor riwayat dan verifikasi rekonsiliasi"
 ```
 
 ### F7.4 — Uji dengan data nyata & tutup fase
-Langkah manusia: ekspor XLSX SIMAN-2 (07-MIGRASI §2), jalankan `sail artisan siman2:impor storage/app/tmp/siman2.xlsx --dry-run`, perbaiki pemetaan, impor ke database **staging**, jalankan `siman2:verifikasi`, catat hasil di `docs/migrasi/HASIL-UJI-MIGRASI.md` (tanpa data pribadi).
+Langkah manusia: ekspor XLSX SIMAN-2 (07-MIGRASI §2), jalankan `asp php artisan siman2:impor storage/app/tmp/siman2.xlsx --dry-run`, perbaiki pemetaan, impor ke database **staging**, jalankan `siman2:verifikasi`, catat hasil di `docs/migrasi/HASIL-UJI-MIGRASI.md` (tanpa data pribadi).
 
 ```bash
 git add docs/migrasi/HASIL-UJI-MIGRASI.md CHANGELOG.md
@@ -663,7 +671,7 @@ Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(pemeliharaan): tambah tiket pemeliharaan dan perbaikan aset"
 ```
@@ -672,7 +680,7 @@ git commit -m "feat(pemeliharaan): tambah tiket pemeliharaan dan perbaikan aset"
 **Prompt (salin ke agen AI):**
 ```text
 Baca BR-12, US-PML-01. GET/POST /lapor-kerusakan/{aset}: deskripsi wajib, nama & kontak opsional,
-honeypot, throttle lapor 5/jam/IP, ip_hash (HMAC dengan garam harian di Redis, tanpa IP mentah). Civitas login
+honeypot, throttle lapor 5/jam/IP, ip_hash (HMAC dengan garam harian di cache database, tanpa IP mentah). Civitas login
 melapor dari /pindai. Action TerimaLaporanKerusakan → tiket baru → notifikasi PIC (event; notifikasi F11).
 Test: tanpa IP mentah tersimpan; 6 laporan/jam → 429; honeypot diabaikan. Jangan ubah berkas di luar cakupan
 langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
@@ -680,7 +688,7 @@ langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan pe
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(publik): tambah lapor kerusakan dari qr"
 ```
@@ -713,7 +721,7 @@ tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(dbr): tambah daftar barang ruangan bertanda tangan berbasis snapshot"
 ```
@@ -722,7 +730,7 @@ git commit -m "feat(dbr): tambah daftar barang ruangan bertanda tangan berbasis 
 **Prompt (salin ke agen AI):**
 ```text
 Baca RG-04, BR-14, US-INV-01. Migrasi periode_inventarisasi, inventarisasi_ruangan, hasil_inventarisasi; enum.
-Actions BukaPeriode (hanya satu berjalan; Cache::lock), penugasan petugas per ruangan. Selama berjalan,
+Actions BukaPeriode (hanya satu berjalan; DB::transaction + lockForUpdate), penugasan petugas per ruangan. Selama berjalan,
 AjukanMutasi untuk ruangan yang sedang diinventarisasi memberi peringatan/ditahan (BR-14). Test satu periode
 berjalan saja. Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu
 tampilkan ringkasan perubahan.
@@ -730,7 +738,7 @@ tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(inventarisasi): tambah periode inventarisasi dan penugasan ruangan"
 ```
@@ -748,7 +756,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(inventarisasi): tambah pemindaian inventarisasi per ruangan"
 ```
@@ -765,7 +773,7 @@ luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(inventarisasi): tambah penutupan periode dan berita acara"
 ```
@@ -794,7 +802,7 @@ langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan pe
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(penghapusan): tambah usulan penghapusan dan pencatatan sk"
 ```
@@ -803,14 +811,14 @@ git commit -m "feat(penghapusan): tambah usulan penghapusan dan pencatatan sk"
 **Prompt (salin ke agen AI):**
 ```text
 Baca LAP-02, US-LAP-01. Widget: jumlah & nilai aset per ruangan/kategori/kondisi, pinjaman aktif & terlambat,
-tiket terbuka, DBR perlu diperbarui, peringatan inventarisasi. Cache Redis 30 menit dibersihkan saat data berubah.
+tiket terbuka, DBR perlu diperbarui, peringatan inventarisasi. Cache::remember 30 menit (store database), Cache::forget di observer saat data berubah; tanpa job debounce.
 PIC melihat ruangannya; pimpinan semua (tanpa data pribadi). Test angka & cakupan. Jangan ubah berkas di luar
 cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 ```
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(laporan): tambah dasbor aset sesuai peran"
 ```
@@ -818,7 +826,7 @@ git commit -m "feat(laporan): tambah dasbor aset sesuai peran"
 ### F10.3 — Laporan & ekspor
 **Prompt (salin ke agen AI):**
 ```text
-Baca PRD §9 (LAP-02–LAP-09) dan RG-05, RG-11. Exporter (antrean ekspor, disk tmp ≤ 24 jam): rekap aset,
+Baca PRD §9 (LAP-02–LAP-09) dan RG-05, RG-11. Exporter (antrean `berat`, disk tmp ≤ 24 jam): rekap aset,
 daftar RB & hilang, riwayat peminjaman, rekonsiliasi semesteran (kode+NUP, lokasi, kondisi, nilai), DKPS LAMDIK
 sarana laboratorium & pembelajaran / prasarana / TIK per prodi (urutan kolom persis perlu verifikasi dari
 templat DKPS; dokumentasikan pemetaan di docs/FORMAT-DKPS.md), rekap pemeliharaan, log. Pimpinan tanpa data
@@ -828,7 +836,7 @@ pint dan test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(laporan): tambah laporan bmn, rekonsiliasi, dan ekspor dkps"
 ```
@@ -849,7 +857,7 @@ git switch main && git pull && git tag -a v0.10.0 -m "Fase 10: penghapusan dan l
 
 **Prompt (salin ke agen AI):**
 ```text
-Baca 02-ARSITEKTUR §7. Buat semua notifikasi (ShouldQueue, antrean notifikasi, mail + database; WhatsApp
+Baca 02-ARSITEKTUR §7. Buat semua notifikasi (ShouldQueue, antrean default, mail + database; WhatsApp
 opsional via channel kustom & env WHATSAPP_ENABLED). Ganti event stub fase sebelumnya. Test penerima benar.
 Jangan ubah berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu tampilkan
 ringkasan perubahan.
@@ -857,7 +865,7 @@ ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(notifikasi): tambah notifikasi peminjaman, mutasi, dan pemeliharaan"
 ```
@@ -867,13 +875,14 @@ git commit -m "feat(notifikasi): tambah notifikasi peminjaman, mutasi, dan pemel
 ```text
 Baca 02-ARSITEKTUR §6. Perintah & jadwal: pengingat terlambat, pengingat pengambilan, tandai DBR usang,
 periksa tautan, pengingat inventarisasi, pangkas peminjaman (BR-23 anonimkan data pribadi lama), bersihkan tmp;
-withoutOverlapping & onOneServer. Test jadwal & retensi. Jangan ubah berkas di luar cakupan langkah ini.
+withoutOverlapping & onOneServer. Tambahkan jadwal standar STANDAR-TEKNIS §1b (worker antrean, detak
+penjadwal, queue:prune-failed/batches); tanpa horizon:snapshot. Test jadwal & retensi. Jangan ubah berkas di luar cakupan langkah ini.
 Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 ```
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(penjadwal): tambah tugas terjadwal pengingat dan retensi"
 ```
@@ -892,7 +901,7 @@ test, lalu tampilkan ringkasan perubahan.
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "feat(api): tambah api ruangan dan pemakaian untuk sistem surat"
 ```
@@ -921,7 +930,7 @@ berkas di luar cakupan langkah ini. Setelah selesai jalankan pint dan test, lalu
 
 **Commit:**
 ```bash
-sail bin pint && sail artisan test
+asp ./vendor/bin/pint && asp php artisan test
 git add -A
 git commit -m "test(keamanan): tambah uji matriks akses, idor, dan konkurensi"
 ```
@@ -929,8 +938,8 @@ git commit -m "test(keamanan): tambah uji matriks akses, idor, dan konkurensi"
 ### F12.2 — Docker produksi & cadangan
 **Prompt (salin ke agen AI):**
 ```text
-Dockerfile & compose produksi pola docker-apps (app, nginx, queue horizon, scheduler, mysql, redis), build
-(composer --no-dev, npm build, optimize, filament:optimize), docs/DEPLOY.md (DNS, TLS, backup harian mysqldump
+Dockerfile & compose produksi pola docker-apps (app, nginx, scheduler; MariaDB native di host; tanpa container queue/Horizon dan tanpa Redis, STANDAR-TEKNIS §1b), build
+(composer --no-dev, npm build, optimize, filament:optimize), docs/DEPLOY.md (DNS, TLS, backup harian mariadb-dump
 30 hari + uji pulih). .env.production.example tanpa rahasia. Jangan ubah berkas di luar cakupan langkah ini.
 Setelah selesai jalankan pint dan test, lalu tampilkan ringkasan perubahan.
 ```

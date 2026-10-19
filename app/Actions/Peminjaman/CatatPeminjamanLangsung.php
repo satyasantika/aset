@@ -19,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * US-PJM-01: PIC mencatat peminjaman beberapa aset (keranjang) untuk satu peminjam internal; langsung berstatus
  * `dipinjam` (BR-09). Semua-atau-tidak-sama-sekali (BR-08): satu aset tak tersedia → seluruh keranjang gagal.
- * Transaksi + lock Redis per aset + `lockForUpdate`; ketersediaan dicek ulang di dalam lock.
+ * Transaksi + `lockForUpdate` per aset (LockAset); ketersediaan dicek ulang di dalam kunci.
  */
 class CatatPeminjamanLangsung
 {

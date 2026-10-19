@@ -9,7 +9,7 @@ Ringkasan kontrol (checklist 05-UJI §3) dan hasil pemeriksaan F12.1.
 | K-01 Otorisasi server | Policy + Gate di setiap Action; `Gate::before` hanya super-admin | `MatriksAksesTest` (seluruh sel PRD §3.1 per peran) |
 | K-02 Lookup publik terbatas | `Publik/LookupAsetController` hanya field putih (BR-18) | `LookupPublikTest` |
 | K-03 Pelaku = pengguna terautentikasi | `TercatatAktivitas` | `AuditTest` |
-| K-05 Konkurensi | Lock Redis per aset + `lockForUpdate` | `KeamananTest` (tumpang tindih, lock dipegang, mutasi ganda) |
+| K-05 Konkurensi | `DB::transaction()` + `lockForUpdate()` + indeks `UNIQUE` (Profil Ringan, tanpa `Cache::lock`; kondisi saat ini sampai Fase B: lock Redis per aset + `lockForUpdate`) | `KeamananTest` (tumpang tindih, lock dipegang, mutasi ganda) |
 | K-06 QR di server | `endroid/qr-code` | `KeamananTest` (tak ada layanan QR pihak ketiga) |
 | K-07 Rate limit | login 5/mnt, lookup 30/mnt/IP, lapor 5/jam/IP, API 60/mnt/token | `LoginAmanTest`, `LaporKerusakanTest`, `KeamananTest`, `ApiRuanganTest` |
 | K-08 MFA | `WajibMfaAdmin` untuk super-admin & admin-bmn | `PenggunaTest` |
@@ -36,4 +36,4 @@ Jalankan ulang sebelum setiap rilis dan setiap bulan; CI menjalankan `composer a
 ## Catatan yang perlu perhatian manusia
 
 - K-04 (tanpa data tiruan di produksi) dan K-11 (menonaktifkan Web App GAS lama) adalah langkah cutover, bukan kode — lihat `docs/DEPLOY.md` dan `docs/07-MIGRASI-DATA.md` §7.
-- Uji konkurensi di SQLite memverifikasi logika dan lock Redis; `lockForUpdate` baru efektif pada basis data server (mis. MySQL/PostgreSQL). Bila produksi memakai SQLite, penulisan tetap diserialkan oleh basis data dan lock Redis per aset.
+- Uji konkurensi di SQLite memverifikasi logika (kondisi saat ini juga lock Redis, yang dihapus pada Profil Ringan §1b); `lockForUpdate` baru efektif pada basis data server (mis. MariaDB). Bila produksi memakai SQLite, penulisan hanya diserialkan oleh basis data itu sendiri (satu penulis pada satu waktu), dan uji tabrakan baru bermakna di MariaDB. Diputuskan 16 Oktober 2026: MariaDB, berlaku setelah Fase B; kondisi saat ini: SQLite (`docs/KEPUTUSAN.md`).

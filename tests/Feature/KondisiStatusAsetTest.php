@@ -19,6 +19,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
@@ -81,7 +82,7 @@ it('menghormati toggle fitur ubah kondisi hanya untuk perubahan manual (BR-22)',
 
     expect(fn () => app(UbahKondisiAset::class)->handle($aset, KondisiAset::RusakRingan, $admin))->toThrow(FiturNonaktif::class);
 
-    app(UbahKondisiAset::class)->handle($aset, KondisiAset::RusakRingan, $admin, 'peminjaman', 'p-1');
+    app(UbahKondisiAset::class)->handle($aset, KondisiAset::RusakRingan, $admin, 'peminjaman', (string) Str::uuid());
     expect($aset->fresh()->kondisi)->toBe(KondisiAset::RusakRingan)->and($aset->riwayatKondisi()->first()->sumber)->toBe('peminjaman');
 });
 

@@ -1,5 +1,8 @@
-# ASET FKIP — image produksi (php-fpm). Dipakai untuk peran app, queue (Horizon), dan scheduler.
+# ASET FKIP — image produksi (php-fpm). Dipakai untuk peran app (php-fpm), scheduler (schedule:work + worker antrean), dan cadangan.
+# Profil Ringan (STANDAR-TEKNIS §1b, §7): PHP 8.5; MariaDB native di host (image hanya memuat klien); worker dijalankan penjadwal.
 # Tahap 1: aset front-end (Vite). Tahap 2: dependensi Composer tanpa dev. Tahap 3: runtime.
+
+ARG PHP_VERSION=8.5
 
 FROM node:22-alpine AS aset
 WORKDIR /app
@@ -15,14 +18,17 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --no-progress --no-scripts --prefer-dist --ignore-platform-reqs --optimize-autoloader
 
-FROM php:8.3-fpm-alpine AS runtime
-RUN apk add --no-cache icu-libs libpng libjpeg-turbo freetype libzip libxml2 oniguruma sqlite sqlite-libs tzdata \
-    && apk add --no-cache --virtual .build icu-dev libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev oniguruma-dev sqlite-dev $PHPIZE_DEPS linux-headers \
+FROM php:${PHP_VERSION}-fpm-alpine AS runtime
+# mariadb-client: mariadb-dump untuk cadangan terjadwal dan klien `mariadb` untuk pemeriksaan (bukan server basis data).
+RUN apk add --no-cache icu-libs libpng libjpeg-turbo freetype libzip libxml2 oniguruma tzdata mariadb-client \
+    && apk add --no-cache --virtual .build icu-dev libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev oniguruma-dev $PHPIZE_DEPS linux-headers \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" intl gd bcmath pcntl pdo_sqlite zip exif opcache \
-    && pecl install redis && docker-php-ext-enable redis \
+    && docker-php-ext-install -j"$(nproc)" intl gd bcmath pcntl pdo_mysql zip exif \
+    # PHP 8.5+ menyertakan opcache bawaan; versi lebih lama memasangnya sebagai ekstensi terpisah
+    && (php -m | grep -qi 'zend opcache' || docker-php-ext-install opcache) \
     && apk del .build
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/siman.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/zz-siman.conf
 ENV TZ=Asia/Jakarta APP_ENV=production APP_DEBUG=false
 WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .

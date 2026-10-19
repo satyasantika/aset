@@ -118,4 +118,4 @@ git config core.hooksPath .githooks
 
 ## 8. CI minimal (GitHub Actions / GitLab CI)
 
-Jalankan pada setiap PR: `composer install` → `pint --test` → `phpstan` → `pest` dengan service MySQL 8.4 dan Redis 7. PR tidak boleh di-merge bila CI merah.
+Jalankan pada setiap PR: `composer install` → `pint --test` → `phpstan` → `pest` dengan service MariaDB 10.11 dan Redis 7. PR tidak boleh di-merge bila CI merah.

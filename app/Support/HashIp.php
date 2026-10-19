@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * IP pelapor TIDAK disimpan mentah (BR-12). Disimpan HMAC-SHA256(IP, garam harian). Garam acak dibuat per hari di
- * Redis (cache) dan kedaluwarsa setelah 2 hari: hash hanya dapat dibandingkan dalam hari yang sama (mendeteksi
+ * cache `database` dan kedaluwarsa setelah 2 hari: hash hanya dapat dibandingkan dalam hari yang sama (mendeteksi
  * pelapor berulang) dan tidak dapat dipulihkan menjadi IP, juga tidak dapat dilacak lintas hari.
  */
 class HashIp

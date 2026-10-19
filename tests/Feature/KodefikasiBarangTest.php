@@ -16,6 +16,10 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
+// Import/Export Filament memaksa koneksi antrean 'database-berat' (Profil Ringan) lewat
+// getJobConnection(); jalankan sinkron di sini supaya hasilnya bisa diperiksa langsung di test.
+beforeEach(fn () => config(['queue.connections.database-berat.driver' => 'sync']));
+
 beforeEach(function () {
     $this->seed(PeranDanIzinSeeder::class);
     Filament::setCurrentPanel(Filament::getPanel('admin'));
@@ -50,11 +54,10 @@ it('mengimpor CSV kodefikasi lewat antrean impor dan memperbarui kode yang sama'
         ->and(KodefikasiBarang::query()->where('kode', 'XYZ')->exists())->toBeFalse();
 });
 
-it('menjalankan importer di antrean impor', function () {
-    $importer = new ReflectionMethod(KodefikasiBarangImporter::class, 'getJobQueue');
+it('menjalankan importer di antrean berat pada koneksi database-berat', function () {
     $contoh = (new ReflectionClass(KodefikasiBarangImporter::class))->newInstanceWithoutConstructor();
 
-    expect($importer->invoke($contoh))->toBe('impor');
+    expect($contoh->getJobQueue())->toBe('berat')->and($contoh->getJobConnection())->toBe('database-berat');
 });
 
 it('rule KodeBarangValid menerima hanya kode tingkat 5 yang terdaftar', function (string $kode, bool $lolos) {

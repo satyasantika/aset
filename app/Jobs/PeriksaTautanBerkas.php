@@ -12,7 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-/** Memeriksa keteraksesan satu tautan berkas (antrean `tautan`); status bersifat informatif (§1a.3). */
+/** Memeriksa keteraksesan satu tautan berkas (antrean `default`); status bersifat informatif (§1a.3). */
 class PeriksaTautanBerkas implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -21,7 +21,7 @@ class PeriksaTautanBerkas implements ShouldQueue
 
     public function __construct(public readonly string $tautanId)
     {
-        $this->onQueue('tautan');
+        $this->onQueue('default');
     }
 
     public function handle(PemeriksaTautan $pemeriksa): void

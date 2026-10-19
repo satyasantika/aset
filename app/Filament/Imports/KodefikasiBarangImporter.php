@@ -31,7 +31,12 @@ class KodefikasiBarangImporter extends Importer
 
     public function getJobQueue(): ?string
     {
-        return 'impor';
+        return 'berat';
+    }
+
+    public function getJobConnection(): ?string
+    {
+        return 'database-berat';
     }
 
     public static function getCompletedNotificationBody(Import $import): string

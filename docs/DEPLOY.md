@@ -1,8 +1,15 @@
 # Panduan deploy produksi ASET FKIP
 
-Pola: satu host Docker (Linux) menjalankan `compose.prod.yaml` dengan enam layanan — `app` (php-fpm), `web` (nginx),
+> **Profil Ringan berlaku setelah Fase B; kondisi saat ini: `compose.prod.yaml` masih menjalankan enam layanan (`app`, `web`,
+> `queue` = Horizon, `scheduler`, `redis`, `cadangan`) dengan antrean/cache/sesi di Redis.** Setelah Fase B (`STANDAR-TEKNIS.md` §1b,
+> `02-ARSITEKTUR.md`): tidak ada container `queue`/Horizon dan `redis`; antrean, cache, sesi, dan lock memakai basis data (driver
+> `database`); satu container `scheduler` (`schedule:work`) menjalankan jadwal sekaligus worker antrean (`--stop-when-empty`);
+> pemantauan lewat `/api/health` (dan `queue:failed`/`queue:retry`). Bagian di bawah yang bertanda *(saat ini)* akan diganti
+> ketika Fase B selesai dan berkas ini diperbarui.
+
+Pola saat ini: satu host Docker (Linux) menjalankan `compose.prod.yaml` dengan enam layanan — `app` (php-fpm), `web` (nginx),
 `queue` (Horizon), `scheduler`, `redis`, `cadangan`. **Basis data SQLite (mode WAL) pada volume `data`; tidak ada
-MySQL** (keputusan pemilik, `docs/KEPUTUSAN.md`). TLS dihentikan di reverse proxy host.
+MySQL/MariaDB (kondisi saat ini)**. Diputuskan 16 Oktober 2026: MariaDB 10.11+ native di host, berlaku setelah Fase B; kondisi saat ini: SQLite (`docs/KEPUTUSAN.md`). TLS dihentikan di reverse proxy host.
 
 > **Status verifikasi:** `compose.prod.yaml` tervalidasi (`docker compose config`), sintaks skrip entrypoint/`cadangan.sh` diperiksa (`sh -n`) tetapi belum dijalankan (CLI `sqlite3` tidak tersedia di lingkungan pengembangan),
 > dan build image penuh belum dapat diselesaikan di lingkungan pengembangan (unduhan Composer timeout). Jalankan
@@ -65,8 +72,9 @@ Lalu minta admin memakai "lupa kata sandi"/atur ulang untuk menetapkan kata sand
 | Tugas | Perintah |
 |---|---|
 | Status layanan | `docker compose -f compose.prod.yaml ps` · `curl -s https://<domain>/api/health` |
-| Log | `docker compose -f compose.prod.yaml logs -f app queue scheduler` |
-| Horizon (antrean) | panel `/horizon` (super-admin) · `exec queue php artisan horizon:status` |
+| Log | `docker compose -f compose.prod.yaml logs -f app queue scheduler` *(saat ini; Profil Ringan: `logs -f app scheduler`)* |
+| Antrean *(saat ini: Horizon)* | panel `/horizon` (super-admin) · `exec queue php artisan horizon:status` |
+| Antrean *(Profil Ringan, setelah Fase B)* | `curl -s https://<domain>/api/health` (job tertunda, `failed_jobs`, detak penjadwal) · `exec scheduler php artisan queue:failed` · `queue:retry <id>`; tidak ada dasbor `/horizon` |
 | Tugas terjadwal | dijalankan layanan `scheduler` (`schedule:work`): lihat `routes/console.php` |
 | Pemeliharaan | `exec app php artisan down` / `up` |
 
@@ -75,7 +83,9 @@ Lalu minta admin memakai "lupa kata sandi"/atur ulang untuk menetapkan kata sand
 ```bash
 git fetch --tags && git checkout vX.Y.Z
 docker compose -f compose.prod.yaml --env-file .env.production up -d --build
-docker compose -f compose.prod.yaml exec queue php artisan horizon:terminate   # worker memuat kode baru
+docker compose -f compose.prod.yaml exec queue php artisan horizon:terminate   # worker memuat kode baru (saat ini)
+# Profil Ringan (setelah Fase B): tidak perlu langkah ini; worker berumur ≤ 1 menit (--stop-when-empty) sehingga otomatis memuat kode baru.
+# Cukup: docker compose -f compose.prod.yaml restart scheduler
 ```
 
 Migrasi dijalankan otomatis oleh `app`. **Cadangkan dulu** (`cadangan.sh sekali`, bagian 5) sebelum memperbarui.
@@ -107,11 +117,12 @@ Catat tanggal dan hasil uji pulih (jumlah baris cocok, aplikasi dapat login) di 
 
 - `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`; HSTS dikirim aplikasi saat `APP_ENV=production` (`HeaderKeamanan`).
 - Hanya port 80/443 reverse proxy yang terbuka ke publik; `WEB_PORT` hanya di `127.0.0.1` (atur `ports: "127.0.0.1:8080:80"` bila perlu).
-- Redis tidak dipublikasikan ke host. Rahasia hanya di `.env.production` (izin `chmod 600`).
+- Layanan `redis` *(saat ini)* tidak dipublikasikan ke host; pada Profil Ringan layanan ini dihapus. Rahasia hanya di `.env.production` (izin `chmod 600`).
 - Jalankan `composer audit` dan `npm audit` setiap rilis (hasil: `docs/KEAMANAN.md`).
 
-## 7. Bila ingin beralih ke MySQL/PostgreSQL
+## 7. Beralih ke MariaDB (berlaku setelah Fase B; kondisi saat ini: SQLite)
 
-Tambahkan layanan basis data pada compose, ubah `DB_CONNECTION`/`DB_HOST`/kredensial di `.env.production`, jalankan
-`php artisan migrate --force`, dan ganti layanan `cadangan` dengan `mysqldump`/`pg_dump` harian (30 hari). Uji konkurensi
-(`KeamananTest`) tetap valid; `lockForUpdate` baru benar-benar efektif pada basis data server.
+Diputuskan 16 Oktober 2026: basis data produksi adalah MariaDB 10.11+ native di host (bukan container), sama dengan aplikasi produksi lain. `compose.prod.yaml` memakai `extra_hosts: ["host.docker.internal:host-gateway"]` dan **tidak boleh memuat container database** (CI boleh memakai service container sementara). Tambahkan koneksi pada
+`.env.production` (`DB_CONNECTION=mariadb`, `DB_HOST=host.docker.internal`, `DB_DATABASE=db_aset`, kredensial), jalankan `php artisan migrate --force`, dan ganti layanan
+`cadangan` dengan `mariadb-dump` harian (30 hari). Kolom UUID memakai tipe native MariaDB; data lama SQLite (varchar(36), format UUID valid) dapat dimasukkan ke kolom UUID saat migrasi. Migrasi data SQLite ke MariaDB adalah butir Fase B (prosedur menyusul).
+Uji konkurensi (`KeamananTest`) baru bermakna di MariaDB; `lockForUpdate` baru efektif pada basis data server.

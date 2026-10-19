@@ -37,8 +37,8 @@ bukan menggantikannya.
 
 ## Teknologi
 
-- **Backend**: Laravel 13 (PHP 8.3), Filament 5, Livewire
-- **Data**: MySQL 8.4, Redis 7, Laravel Horizon (queue)
+- **Backend**: Laravel 13 (PHP 8.5; kode saat ini masih PHP 8.3 sampai Fase B), Filament 5, Livewire
+- **Data**: MariaDB 10.11+ native di host (`db_aset`, `db_aset_testing`; UUID native MariaDB, UUIDv7 dibuat aplikasi; produksi saat ini masih SQLite sampai Fase B, lihat `docs/KEPUTUSAN.md`). Profil Ringan: antrean, cache, sesi, dan lock di basis data (tanpa Redis/Horizon); kondisi kode saat ini sampai Fase B masih memakai Redis + Horizon
 - **Keamanan & audit**: Laravel Sanctum, Spatie Permission, Spatie Activitylog
 - **Dokumen & cetak**: barryvdh/laravel-dompdf, endroid/qr-code, spatie/simple-excel
 - **Frontend build**: Vite, Tailwind CSS 4
@@ -46,6 +46,7 @@ bukan menggantikannya.
 
 ## Menjalankan secara lokal
 
-Proyek berjalan di dalam Docker (lihat `docker-compose.yml` di root workspace `code/`),
-dengan container `aset-php` (PHP-FPM) dan `aset-nginx`. Variabel lingkungan diatur lewat
+Proyek berjalan di dalam Docker FKIP (`docs/STANDAR-TEKNIS.md` §2, tanpa Laravel Sail): container `aset-php` (PHP-FPM),
+`aset-nginx` (port 8012), dan `aset-scheduler`; MariaDB native di host lewat `host.docker.internal`; alias shell `asp` = `docker compose exec aset-php`
+(mis. `asp php artisan test`). Variabel lingkungan diatur lewat
 `.env` (lihat `.env.example`), tidak pernah disertakan di repository.

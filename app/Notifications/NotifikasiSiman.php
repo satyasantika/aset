@@ -11,7 +11,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Dasar notifikasi SIMAN: antrean `notifikasi`, dikirim setelah transaksi commit, saluran mail + database (tampil di
+ * Dasar notifikasi SIMAN: antrean `default`, dikirim setelah transaksi commit, saluran mail + database (tampil di
  * lonceng panel Filament). WhatsApp hanya bila subkelas mengaktifkannya (`pakaiWhatsapp`) dan gateway menyala.
  */
 abstract class NotifikasiSiman extends Notification implements ShouldQueue
@@ -20,7 +20,7 @@ abstract class NotifikasiSiman extends Notification implements ShouldQueue
 
     public function __construct()
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
         $this->afterCommit();
     }
 

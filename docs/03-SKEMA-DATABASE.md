@@ -1,6 +1,6 @@
 # 03 — Skema Database: ASET FKIP 3
 
-MySQL 8.4, `utf8mb4_0900_ai_ci`, InnoDB. Semua tabel domain memiliki `id`, `created_at`, `updated_at`; semua primary key `id` **UUIDv7** CHAR(36) (`HasUuids`, STANDAR-TEKNIS §4a); FK `foreignUuid`, polimorfik `uuidMorphs`; URL, QR, dan API memakai `id` yang sama (tanpa kolom `ulid`).
+MariaDB 10.11+, `utf8mb4_unicode_ci`, InnoDB. Semua tabel domain memiliki `id`, `created_at`, `updated_at`; semua primary key `id` UUID (tipe native MariaDB lewat Blueprint Laravel; UUIDv7 dibuat aplikasi lewat `HasUuids`, STANDAR-TEKNIS §4a; jangan `char('id', 36)`/`binary(16)` eksplisit); FK `foreignUuid`, polimorfik `uuidMorphs`; URL, QR, dan API memakai `id` yang sama (tanpa kolom `ulid`).
 
 ## 1. ERD
 
@@ -54,7 +54,7 @@ erDiagram
 | kapasitas | SMALLINT UNSIGNED NULL | |
 | dapat_dipinjam | BOOL default false | Untuk katalog & API Surat |
 | luas_m2 | DECIMAL(8,2) NULL | DKPS prasarana |
-| k3l | JSON NULL | `{apar: true, p3k: true, jalur_evakuasi: true}` (RG-11) |
+| k3l | JSON NULL (JSON = alias LONGTEXT di MariaDB; tidak memakai fungsi `JSON_*`; cast array Laravel) | `{apar: true, p3k: true, jalur_evakuasi: true}` (RG-11) |
 | keterangan | TEXT NULL | |
 | deleted_at | TIMESTAMP NULL | |
 Pivot `prodi_ruangan` (`prodi_id`, `ruangan_id`). Tabel `prodi` (kode, nama, `kode_eksternal`).
@@ -104,7 +104,7 @@ FULLTEXT(`uraian`).
 | keterangan | TEXT | ya | |
 | deleted_at | TIMESTAMP | ya | hanya untuk salah input oleh super-admin |
 
-Indeks: UNIQUE(`kode_barang`,`nup`) (NULL diabaikan MySQL), (`ruangan_id`,`status`,`kondisi`), (`status`), (`kode_barang`), FULLTEXT(`nama`,`merk_tipe`). CHECK: `kondisi IN ('B','RR','RB')`; `status_bmn <> 'tercatat' OR (kode_barang IS NOT NULL AND nup IS NOT NULL)`; `status <> 'dihapus' OR nomor_sk_penghapusan IS NOT NULL`.
+Indeks: UNIQUE(`kode_barang`,`nup`) (NULL diabaikan MariaDB), (`ruangan_id`,`status`,`kondisi`), (`status`), (`kode_barang`), FULLTEXT(`nama`,`merk_tipe`). CHECK: `kondisi IN ('B','RR','RB')`; `status_bmn <> 'tercatat' OR (kode_barang IS NOT NULL AND nup IS NOT NULL)`; `status <> 'dihapus' OR nomor_sk_penghapusan IS NOT NULL`.
 
 ### `riwayat_kondisi_aset`
 `aset_id`, `dari` CHAR(2) NULL, `ke` CHAR(2), `sumber` (manual, peminjaman, inventarisasi, laporan_kerusakan, migrasi), `sumber_id` NULL, `catatan`, `oleh` FK NULL, `created_at`.
@@ -153,10 +153,10 @@ UNIQUE(`teks`). Diisi saat migrasi (07-MIGRASI-DATA §4).
 ## 5. DBR, inventarisasi, penghapusan
 
 ### `dbr_versi`
-`ruangan_id` NULL, `jenis` (`dbr`, `dbl`), `versi` INT, `status` (draf, disetujui_pic, disahkan, perlu_diperbarui), `snapshot` JSON (daftar aset: kode_barang, nup, nama, merk, tahun, kondisi; penandatangan; waktu), `disetujui_pic_oleh/pada`, `disahkan_oleh/pada`. UNIQUE(`ruangan_id`,`jenis`,`versi`).
+`ruangan_id` NULL, `jenis` (`dbr`, `dbl`), `versi` INT, `status` (draf, disetujui_pic, disahkan, perlu_diperbarui), `snapshot` JSON (JSON = alias LONGTEXT di MariaDB; tidak memakai fungsi `JSON_*`; cast array Laravel) (daftar aset: kode_barang, nup, nama, merk, tahun, kondisi; penandatangan; waktu), `disetujui_pic_oleh/pada`, `disahkan_oleh/pada`. UNIQUE(`ruangan_id`,`jenis`,`versi`).
 
 ### `periode_inventarisasi`
-`nama` ("Inventarisasi 2026"), `jenis` (`sensus`, `opname_internal`), `mulai`, `selesai_rencana`, `status` (rencana, berjalan, ditutup, disahkan), `berita_acara` JSON snapshot, `disahkan_oleh/pada`. Satu `berjalan` (BR-14) ditegakkan di Action + lock.
+`nama` ("Inventarisasi 2026"), `jenis` (`sensus`, `opname_internal`), `mulai`, `selesai_rencana`, `status` (rencana, berjalan, ditutup, disahkan), `berita_acara` JSON snapshot (JSON = alias LONGTEXT di MariaDB; tidak memakai fungsi `JSON_*`; cast array Laravel), `disahkan_oleh/pada`. Satu `berjalan` (BR-14) ditegakkan di Action + lock.
 
 ### `inventarisasi_ruangan`
 `periode_id`, `ruangan_id`, `petugas_id` (FK users, multi via pivot `inventarisasi_petugas` bila perlu), `status` (belum, berjalan, selesai), `selesai_pada`. UNIQUE(`periode_id`,`ruangan_id`).

@@ -24,7 +24,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
@@ -111,17 +111,17 @@ it('hanya satu periode berjalan dalam satu waktu (BR-14)', function () {
     expect(app(BukaPeriode::class)->handle($b, $admin)->status)->toBe(StatusPeriodeInventarisasi::Berjalan);
 });
 
-it('pembukaan periode dijaga lock: proses lain yang sedang membuka membuat permintaan ditolak rapi', function () {
+it('pembukaan periode mengunci baris penomoran mutex-nya (lockForUpdate)', function () {
     $admin = invUser('admin-bmn');
     $p = invPeriode($admin, [invRuang('R-1')]);
 
-    $lock = Cache::lock('aset:inventarisasi:buka', 10);
-    expect($lock->get())->toBeTrue();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    $status = app(BukaPeriode::class)->handle($p, $admin)->status;
+    $kunci = collect(DB::getQueryLog())->pluck('query')->filter(fn (string $q) => str_contains($q, 'from `penomoran`') && str_contains($q, 'for update'));
+    DB::disableQueryLog();
 
-    expect(fn () => app(BukaPeriode::class)->handle($p, $admin))->toThrow(ValidationException::class, 'sedang berjalan');
-    $lock->release();
-
-    expect(app(BukaPeriode::class)->handle($p, $admin)->status)->toBe(StatusPeriodeInventarisasi::Berjalan);
+    expect($status)->toBe(StatusPeriodeInventarisasi::Berjalan)->and($kunci)->not->toBeEmpty();
 });
 
 it('periode tanpa ruangan dan peran tanpa izin tidak dapat dibuka', function () {

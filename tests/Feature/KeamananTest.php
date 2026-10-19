@@ -18,7 +18,7 @@ use App\Models\User;
 use Database\Seeders\PeranDanIzinSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -184,22 +184,19 @@ it('konkurensi: dua pengajuan tumpang tindih — yang kedua gagal saat persetuju
         ->and($b->fresh()->status)->toBe(StatusPeminjaman::Diajukan);
 });
 
-it('konkurensi: persetujuan menunggu lock aset yang sedang dipegang proses lain lalu gagal rapi', function () {
-    config(['aset.lock_tunggu_detik' => 1]);
+it('konkurensi: persetujuan mengunci baris aset dengan lockForUpdate (STANDAR-TEKNIS §1b)', function () {
     $r = kmRuangan('K-9');
     $pic = kmUser('pic-ruangan', [$r]);
     $aset = kmAset($r);
     $p = app(AjukanPeminjaman::class)->handle([$aset->id], 'A', now()->addDay(), now()->addDays(2), kmUser('civitas'));
 
-    $lock = Cache::lock("aset:pinjam:{$aset->id}", 30);
-    expect($lock->get())->toBeTrue();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    app(SetujuiPeminjaman::class)->handle($p, $pic);
+    $kunci = collect(DB::getQueryLog())->pluck('query')->filter(fn (string $q) => str_contains($q, 'from `aset`') && str_contains($q, 'for update'));
+    DB::disableQueryLog();
 
-    try {
-        expect(fn () => app(SetujuiPeminjaman::class)->handle($p, $pic))->toThrow(ValidationException::class)
-            ->and($p->fresh()->status)->toBe(StatusPeminjaman::Diajukan);
-    } finally {
-        $lock->release();
-    }
+    expect($kunci)->not->toBeEmpty();
 });
 
 it('konkurensi: aset yang sudah ada di pengajuan mutasi menunggu tidak dapat diajukan lagi; setelah pindah, ajukan dari ruangan lama ditolak', function () {

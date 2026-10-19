@@ -6,6 +6,11 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+### Diubah
+- Dokumentasi diselaraskan ke keputusan pemilik 16 Oktober 2026 (lanjutan): nama database `db_aset`/`db_aset_testing`; UUID native MariaDB (klaim CHAR(36) dihapus, gerbang uji tipe kolom ditambahkan di F1.4); produksi MariaDB native via `host.docker.internal` tanpa container database; dump `mariadb-dump`; asumsi Laravel Sail dihapus dari `docs/04-PROMPT-BERTAHAP.md` (F1.1 ditulis ulang mengikuti Docker FKIP, penomoran F1.x tetap), `docs/CLAUDE.md`, dan `README.md`; butir Fase B PHP 8.5 dan migrasi data SQLite ke MariaDB dicatat. Kode belum berubah.
+- Dokumentasi diselaraskan ke keputusan pemilik 16 Oktober 2026: PHP 8.5, MariaDB 10.11+ native di host (menggantikan MySQL 8.4; SQLite tidak dipakai), kolasi `utf8mb4_unicode_ci`; butir SQLite vs MySQL di `docs/KEPUTUSAN.md` ditandai diputuskan; migrasi data SQLite ke MariaDB dicatat sebagai butir Fase B; sisa penyebutan antrean ekspor di `docs/04-PROMPT-BERTAHAP.md` diganti antrean `berat`. Kode belum berubah (menunggu Fase B).
+- Dokumentasi diselaraskan ke Profil Ringan (`docs/STANDAR-TEKNIS.md` §1b): `DEPLOY.md`, `KEAMANAN.md` (K-05), `PANDUAN-ADMIN.md`, dan `README.md` tidak lagi menggambarkan Horizon/Redis sebagai arsitektur target; kondisi produksi saat ini ditandai. Butir terbuka SQLite vs MySQL dicatat di `docs/KEPUTUSAN.md`. Kode belum berubah (menunggu Fase B).
+
 ### Ditambahkan
 - Landing page (`/`) dan panduan HTML per peran dengan tangkapan layar (`public/panduan/*.html`; pembangun: `scripts/panduan/`).
 - Dukungan pemasangan di subpath `https://supportfkip.unsil.ac.id/aset` (`APP_URL` berpath, `UrlDasar`, trusted proxy, cookie sesi `siman_session` berpath `/aset`, contoh konfigurasi proxy `docker/nginx/supportfkip.conf.example`).

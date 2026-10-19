@@ -14,7 +14,7 @@ class TautanBerkasMati extends Notification implements ShouldQueue
 
     public function __construct(public readonly TautanBerkas $tautan)
     {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
     }
 
     /** @return list<string> */

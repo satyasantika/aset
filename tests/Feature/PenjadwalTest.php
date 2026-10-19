@@ -49,7 +49,7 @@ function pjAset(): array
 }
 
 test('jadwal memuat semua perintah dengan withoutOverlapping dan onOneServer', function () {
-    $acara = collect(app(Schedule::class)->events())->filter(fn ($e) => str_contains($e->command, 'aset:'));
+    $acara = collect(app(Schedule::class)->events())->filter(fn ($e) => str_contains((string) $e->command, 'aset:'));
 
     expect($acara)->toHaveCount(7)
         ->and($acara->every(fn ($e) => $e->withoutOverlapping && $e->onOneServer))->toBeTrue();
