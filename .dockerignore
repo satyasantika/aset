@@ -13,3 +13,4 @@ public/build
 !.env.production.example
 tests
 docs/migrasi
+bootstrap/cache/*.php

@@ -12,7 +12,7 @@ function komposProduksi(): array
 }
 
 it('hanya memuat layanan app, web, scheduler, dan cadangan', function () {
-    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['app', 'web', 'scheduler', 'cadangan']);
+    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['php', 'web', 'scheduler', 'cadangan']);
 });
 
 it('tidak memuat container database, redis, atau queue', function () {
@@ -31,7 +31,7 @@ it('tidak memuat container database, redis, atau queue', function () {
 });
 
 it('menghubungkan container ke basis data host lewat host-gateway', function () {
-    foreach (['app', 'scheduler', 'cadangan'] as $nama) {
+    foreach (['php', 'scheduler', 'cadangan'] as $nama) {
         expect(komposProduksi()['services'][$nama]['extra_hosts'])->toContain('host.docker.internal:host-gateway');
     }
 
