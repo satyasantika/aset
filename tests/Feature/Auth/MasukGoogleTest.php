@@ -4,10 +4,12 @@ use App\Models\User;
 use Database\Seeders\PeranDanIzinSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as UserGoogle;
+use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
@@ -46,6 +48,21 @@ it('halaman masuk memuat tombol dan tautannya', function () {
         ->assertOk()
         ->assertSee('Masuk dengan Google')
         ->assertSee(route('auth.google.redirect', ['asal' => route('filament.admin.auth.login')]), false);
+});
+
+it('tombol memakai URL halaman masuk asal pada permintaan Livewire, bukan /livewire/update', function () {
+    $permintaan = Request::create('/livewire/update', 'POST', server: [
+        'HTTP_X_LIVEWIRE' => 'true',
+        'CONTENT_TYPE' => 'application/json',
+    ], content: json_encode(['components' => [['snapshot' => json_encode(['memo' => ['path' => 'admin/login']])]]]));
+    $this->app->instance('request', $permintaan);
+
+    expect(Livewire::isLivewireRequest())->toBeTrue();
+
+    $html = view('auth.tombol-google')->render();
+
+    expect($html)->toContain(e(route('auth.google.redirect', ['asal' => url('admin/login')])))
+        ->and($html)->not->toContain('livewire%2Fupdate');
 });
 
 it('mengarahkan ke Google dengan redirect_uri bawaan', function () {
