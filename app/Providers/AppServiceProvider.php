@@ -30,6 +30,8 @@ use App\Services\TautanEksternal;
 use App\Support\PemicuNotifikasi;
 use App\Support\UrlDasar;
 use Carbon\CarbonImmutable;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -68,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('lookup', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('api-klien', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
+        RateLimiter::for('google-login', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('lapor', fn (Request $request) => Limit::perHour(5)->by($request->ip()));
 
         Gate::policy(Ruangan::class, RuanganPolicy::class);
@@ -79,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(PeriodeInventarisasi::class, PeriodeInventarisasiPolicy::class);
         Gate::policy(InventarisasiRuangan::class, PeriodeInventarisasiPolicy::class);
         Gate::policy(TiketPemeliharaan::class, TiketPemeliharaanPolicy::class);
+
+        FilamentView::registerRenderHook(PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, fn () => view('auth.tombol-google'));
 
         UrlDasar::terapkan();
 
