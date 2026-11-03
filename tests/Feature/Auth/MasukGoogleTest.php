@@ -131,10 +131,11 @@ it('menolak akun ber-MFA', function () {
 
 it('membatalkan di Google kembali ke halaman masuk', function () {
     $this->get(route('auth.google.callback', ['error' => 'access_denied']))
-        ->assertRedirect(route('login'))
+        ->assertRedirect(route('filament.admin.auth.login'))
         ->assertSessionHas('galat_google', 'Masuk dengan Google dibatalkan.');
 
     $this->assertGuest();
+    $this->get(route('filament.admin.auth.login'))->assertSee('Masuk dengan Google dibatalkan.');
 });
 
 it('state OAuth tidak cocok kembali ke halaman masuk', function () {
@@ -153,17 +154,21 @@ it('kembali ke asal bila asal berada di dalam aplikasi, mengabaikan asal di luar
 
     $this->withSession(['google_asal' => 'https://evil.example/'])
         ->get(route('auth.google.callback', ['error' => 'access_denied']))
-        ->assertRedirect(route('login'));
+        ->assertRedirect(route('filament.admin.auth.login'));
 
     $this->withSession(['google_asal' => rtrim(url('/'), '/').'.evil.example/'])
         ->get(route('auth.google.callback', ['error' => 'access_denied']))
-        ->assertRedirect(route('login'));
+        ->assertRedirect(route('filament.admin.auth.login'));
 });
 
 it('asal berbentuk array tidak menyebabkan galat dan tetap mengarah ke Google', function () {
     $lokasi = $this->get(route('auth.google.redirect', ['asal' => ['x']]))->assertRedirect()->headers->get('Location');
 
     expect($lokasi)->toStartWith('https://accounts.google.com/');
+
+    $this->withSession(['google_asal' => ['x']])
+        ->get(route('auth.google.callback', ['error' => 'access_denied']))
+        ->assertRedirect(route('filament.admin.auth.login'));
 });
 
 it('pengguna yang sudah masuk langsung diarahkan', function () {

@@ -80,7 +80,7 @@ class GoogleAuthController extends Controller
 
     private function gagal(string $pesan, ?string $asal): RedirectResponse
     {
-        $ke = ($asal !== null && str_starts_with($asal, rtrim(url('/'), '/').'/')) ? $asal : route('login');
+        $ke = ($asal !== null && str_starts_with($asal, rtrim(url('/'), '/').'/')) ? $asal : route('filament.admin.auth.login');
 
         return redirect()->to($ke)->with('galat_google', $pesan);
     }
