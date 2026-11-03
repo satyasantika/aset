@@ -154,6 +154,16 @@ it('kembali ke asal bila asal berada di dalam aplikasi, mengabaikan asal di luar
     $this->withSession(['google_asal' => 'https://evil.example/'])
         ->get(route('auth.google.callback', ['error' => 'access_denied']))
         ->assertRedirect(route('login'));
+
+    $this->withSession(['google_asal' => rtrim(url('/'), '/').'.evil.example/'])
+        ->get(route('auth.google.callback', ['error' => 'access_denied']))
+        ->assertRedirect(route('login'));
+});
+
+it('asal berbentuk array tidak menyebabkan galat dan tetap mengarah ke Google', function () {
+    $lokasi = $this->get(route('auth.google.redirect', ['asal' => ['x']]))->assertRedirect()->headers->get('Location');
+
+    expect($lokasi)->toStartWith('https://accounts.google.com/');
 });
 
 it('pengguna yang sudah masuk langsung diarahkan', function () {
