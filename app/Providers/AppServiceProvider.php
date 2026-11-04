@@ -70,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('lookup', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('api-klien', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->currentAccessToken()?->getKey() ?? $request->ip()));
-        RateLimiter::for('google-login', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('google-login', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('lapor', fn (Request $request) => Limit::perHour(5)->by($request->ip()));
 
         Gate::policy(Ruangan::class, RuanganPolicy::class);

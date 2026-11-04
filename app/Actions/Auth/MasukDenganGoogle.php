@@ -45,7 +45,7 @@ class MasukDenganGoogle
         }
 
         if ($user->app_authentication_secret !== null) {
-            throw new MasukGoogleDitolak('Akun ini memakai verifikasi dua langkah; masuk dengan surel dan kata sandi.');
+            throw new MasukGoogleDitolak('Akun ini memakai verifikasi dua langkah; masuk dengan surel dan kata sandi, atau gunakan \'Lupa kata sandi\' bila belum punya kata sandi.');
         }
 
         if ($user->google_id === null) {

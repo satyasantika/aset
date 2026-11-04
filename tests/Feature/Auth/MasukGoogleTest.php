@@ -94,18 +94,46 @@ it('mencocokkan surel tanpa peduli huruf', function () {
     expect(User::count())->toBe(1);
 });
 
-it('membuat akun baru untuk surel yang belum terdaftar', function () {
+it('membuat akun baru tanpa peran lalu menolak masuk', function () {
     googleSebagai('baru@gmail.com');
 
-    $this->get(route('auth.google.callback'))->assertRedirect(route('beranda'));
+    $this->get(route('auth.google.callback'))
+        ->assertRedirect(route('filament.admin.auth.login'))
+        ->assertSessionHas('galat_google', 'Akun Google Anda sudah tercatat, tetapi belum diberi peran. Hubungi admin.');
 
+    $this->assertGuest();
     $u = User::firstWhere('email', 'baru@gmail.com');
     expect($u)->not->toBeNull()
         ->and($u->name)->toBe('Nama Google')
         ->and($u->aktif)->toBeTrue()
         ->and($u->email_verified_at)->not->toBeNull()
         ->and($u->google_id)->toBe('g-'.md5('baru@gmail.com'));
-    $this->assertAuthenticated();
+});
+
+it('mengarahkan civitas ke halaman pinjam', function () {
+    $user = User::factory()->create(['email' => 'mhs@student.unsil.ac.id']);
+    $user->assignRole('civitas');
+    googleSebagai('mhs@student.unsil.ac.id');
+
+    $this->get(route('auth.google.callback'))->assertRedirect(route('pinjam'));
+
+    $this->assertAuthenticatedAs($user);
+});
+
+it('memakai redirect_uri bawaan walau GOOGLE_REDIRECT_URI kosong', function () {
+    // Meniru `GOOGLE_REDIRECT_URI=` kosong di .env: nilai config dihitung ulang dari berkas config.
+    putenv('GOOGLE_REDIRECT_URI=');
+    $_ENV['GOOGLE_REDIRECT_URI'] = $_SERVER['GOOGLE_REDIRECT_URI'] = '';
+    config(['services.google.redirect' => (require config_path('services.php'))['google']['redirect']]);
+    putenv('GOOGLE_REDIRECT_URI');
+    unset($_ENV['GOOGLE_REDIRECT_URI'], $_SERVER['GOOGLE_REDIRECT_URI']);
+
+    expect(config('services.google.redirect'))->toBe('/auth/google/callback');
+
+    $lokasi = $this->get(route('auth.google.redirect'))->assertRedirect()->headers->get('Location');
+    parse_str(parse_url($lokasi, PHP_URL_QUERY), $q);
+
+    expect($q['redirect_uri'])->toBe(route('auth.google.callback'));
 });
 
 it('menolak surel yang belum diverifikasi Google', function () {
@@ -141,7 +169,7 @@ it('menolak akun ber-MFA', function () {
     googleSebagai('budi@unsil.ac.id');
 
     $this->get(route('auth.google.callback'))
-        ->assertSessionHas('galat_google', 'Akun ini memakai verifikasi dua langkah; masuk dengan surel dan kata sandi.');
+        ->assertSessionHas('galat_google', 'Akun ini memakai verifikasi dua langkah; masuk dengan surel dan kata sandi, atau gunakan \'Lupa kata sandi\' bila belum punya kata sandi.');
 
     $this->assertGuest();
 });
@@ -194,10 +222,10 @@ it('pengguna yang sudah masuk langsung diarahkan', function () {
     $this->actingAs($user)->get(route('auth.google.redirect'))->assertRedirect(Filament::getPanel('admin')->getUrl());
 });
 
-it('membatasi 10 permintaan per menit per IP', function () {
+it('membatasi 60 permintaan per menit per IP', function () {
     googleSebagai('x@gmail.com', ['email_verified' => false]);
 
-    foreach (range(1, 10) as $_) {
+    foreach (range(1, 60) as $_) {
         $this->get(route('auth.google.callback'))->assertRedirect();
     }
 

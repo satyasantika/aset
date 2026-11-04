@@ -23,7 +23,7 @@ class GoogleAuthController extends Controller
 
         $user = Auth::user();
         if ($user instanceof User) {
-            return redirect()->to($this->tujuan($user));
+            return redirect()->to($this->tujuan($user) ?? route('filament.admin.auth.login'));
         }
 
         $asal = $request->query('asal');
@@ -64,18 +64,26 @@ class GoogleAuthController extends Controller
 
         $tujuan = $this->tujuan($user);
 
+        if ($tujuan === null) {
+            return $this->gagal('Akun Google Anda sudah tercatat, tetapi belum diberi peran. Hubungi admin.', $asal);
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->to($tujuan);
+        return redirect()->intended($tujuan);
     }
 
-    /** Akun tanpa akses panel (mis. civitas atau tanpa peran) diarahkan ke beranda. */
-    private function tujuan(User $user): string
+    /** Panel admin untuk peran panel, /pinjam untuk civitas, null bila belum punya peran. */
+    private function tujuan(User $user): ?string
     {
         $panel = Filament::getPanel('admin');
 
-        return $user->canAccessPanel($panel) ? $panel->getUrl() : route('beranda');
+        if ($user->canAccessPanel($panel)) {
+            return $panel->getUrl();
+        }
+
+        return $user->hasRole('civitas') ? route('pinjam') : null;
     }
 
     private function gagal(string $pesan, ?string $asal): RedirectResponse
