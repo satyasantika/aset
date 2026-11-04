@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\BeritaAcaraPdfController;
 use App\Http\Controllers\DbrPdfController;
 use App\Http\Controllers\LabelPdfController;
@@ -16,6 +17,12 @@ Route::view('/', 'landing')->name('beranda');
 
 // Halaman login tunggal ada di panel; alias ini dipakai middleware `auth` bila tamu membuka rute terlindungi.
 Route::get('/login', fn () => redirect('/admin/login'))->name('login');
+
+// Masuk dengan Google: 404 selama GOOGLE_LOGIN_ENABLED=false.
+Route::prefix('auth/google')->middleware('throttle:google-login')->group(function () {
+    Route::get('redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+});
 
 // Rute publik (BR-17, BR-18): tanpa login, dibatasi 30 permintaan/menit/IP.
 Route::middleware('throttle:lookup')->group(function () {
