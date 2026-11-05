@@ -2,7 +2,7 @@
 # MariaDB berjalan NATIVE di host (DB_HOST=host.docker.internal). Compose ini TIDAK memuat container database,
 # Redis, maupun Horizon; antrean, cache, dan sesi memakai database, worker dinyalakan penjadwal.
 # Jalankan: docker compose -f compose.prod.yaml --env-file .env.production up -d --build
-name: siman
+name: aset
 
 # Log Docker dirotasi (STANDAR-TEKNIS §7.1).
 x-log: &log
